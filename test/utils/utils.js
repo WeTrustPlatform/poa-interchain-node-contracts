@@ -1,6 +1,9 @@
 "use strict";
 
 let assert = require('chai').assert;
+let consts = require('./consts');
+let ethUtils = require('ethereumjs-util');
+let web3Uitl = require('web3-utils');
 
 // we need this becaues test env is different than script env
 let myWeb3 = (typeof web3 === undefined ? undefined : web3);
@@ -61,6 +64,51 @@ module.exports = {
         reject(reason);
       });
     });
+  },
+
+  createMsgHash: function(txHash, toAddress, value, data) {
+
+    const hexEncodedData = this.checkAndEncodeHexPrefix(data);
+
+    return web3Uitl.soliditySha3({ t: 'bytes32', v: txHash}, {t: 'address', v: toAddress}, value, { t: 'bytes', v: hexEncodedData}).substring(2);
+  },
+
+  checkAndEncodeHexPrefix: function(toHex) {
+    if (toHex.length < 2) return '0x';
+
+    if (toHex.substring(0, 2) === '0x') {
+      return toHex;
+    } else
+      return '0x' + toHex;
+  },
+
+  signTransaction: function(userIndexOrPrivateKey, txHash, toAddress, value, data) {
+    const privateKey = (typeof userIndexOrPrivateKey === 'number') ?
+      consts.PRIVATE_KEYS[userIndexOrPrivateKey] : userIndexOrPrivateKey;
+
+    const msgHash = this.createMsgHash(txHash, toAddress, value, data);
+
+    const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), new Buffer(privateKey, 'hex'));
+
+    return { msgHash: '0x' + msgHash, v: sig.v, r :'0x' + sig.r.toString('hex'), s: '0x' + sig.s.toString('hex')};
+  },
+
+  multipleSignedTransaction: function(arryOfUserIndexes, txHash, toAddress, value, data) {
+    const v = [];
+    const r = [];
+    const s = [];
+
+    const msgHash = this.createMsgHash(txHash, toAddress, value, data);
+
+    for(let i = 0; i < arryOfUserIndexes.length; i++) {
+      const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), new Buffer(consts.PRIVATE_KEYS[arryOfUserIndexes[i]], 'hex'));
+
+      v.push(sig.v);
+      r.push('0x' + sig.r.toString('hex'));
+      s.push('0x' + sig.s.toString('hex'));
+    }
+
+    return { msgHash: '0x' + msgHash, v, r, s};
   },
 
   increaseTime: function(bySeconds) {

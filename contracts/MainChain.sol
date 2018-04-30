@@ -5,7 +5,7 @@ import './libs/Freezable.sol';
 
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
 /// @author Stefan George - <stefan.george@consensys.net>
-contract MainChain is MultiSigOwnable, Freezable {
+contract MainChain is Freezable {
 
 	/*
 	 *  Events
@@ -14,7 +14,7 @@ contract MainChain is MultiSigOwnable, Freezable {
 	event Submission(bytes32 indexed txHash);
 	event Execution(bytes32 indexed txHash);
 	event ExecutionFailure(bytes32 indexed txHash);
-	event Deposit(address indexed sender, uint value);
+	event Deposit(address indexed sender, address indexed to, uint value);
 
 	/*
 	 *  Storage
@@ -48,10 +48,14 @@ contract MainChain is MultiSigOwnable, Freezable {
 	/// @dev Contract constructor sets initial owners and required number of confirmations.
 	/// @param _owners List of initial owners.
 	/// @param _required Number of required confirmations.
-	function MainChain(address[] _owners, uint8 _required) MultiSigOwnable(_owners, _required)
+	function MainChain(address[] _owners, uint8 _required) Freezable(_owners, _required)
 	public
-
 	{
+	}
+
+	function deposit(address to) notNull(to) payable public {
+		require(msg.value > 0);
+		emit Deposit(msg.sender, to, msg.value);
 	}
 
 	/// @dev Allows an owner to submit and confirm a transaction.
@@ -59,26 +63,30 @@ contract MainChain is MultiSigOwnable, Freezable {
 	/// @param value Transaction ether value.
 	/// @param data Transaction data payload.
 	/// @return Returns transaction ID.
+	// @TODO we need to add a mechanism to allow owners to withdraw even when frozen
 	function submitTransaction(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s)
 	public
+	notNull(destination)
 	transactionDoesNotExists(txHash)
 	returns (bytes32)
 	{
+		require(!checkIfFrozen());
 		require(v.length >= required);
 		// check whether the msgHash signed has destination, value and data as the message
-		bytes32 hashedTxParams = keccak256(txHash, destination);
+		// if value/data is 0/empty, don't include that in the hash
+		bytes32 hashedTxParams;
+		// return keccak256(txHash, destination, value, data);
+		hashedTxParams = keccak256(txHash, destination, value, data);
 		require(hashedTxParams == msgHash);
 
 		// execute the transaction after all checking the signatures
-		if (hasEnoughRequiredSignatures(msgHash, v, r, s)) { // @TODO check the signatures
+		require (hasEnoughRequiredSignatures(msgHash, v, r, s));
 
-			Transaction storage txn = transactions[txHash];
-			if (external_call(txn.destination, txn.value, txn.data.length, txn.data)) {
-				addTransaction(txHash, destination, value, data);
-				emit Execution(txHash);
-			} else {
-				emit ExecutionFailure(txHash);
-			}
+		if (external_call(destination, value, data.length, data)) {
+			addTransaction(txHash, destination, value, data);
+			emit Execution(txHash);
+		} else {
+			emit ExecutionFailure(txHash);
 		}
 	}
 
@@ -136,6 +144,7 @@ contract MainChain is MultiSigOwnable, Freezable {
 	/// @param value Transaction ether value.
 	/// @param data Transaction data payload.
 	/// @return Returns transaction ID.
+	// @TODO we need to add mechanism to blacklist certain txHash
 	function addTransaction(bytes32 txHash, address destination, uint value, bytes data)
 	internal
 	notNull(destination)
