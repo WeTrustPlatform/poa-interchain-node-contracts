@@ -5,7 +5,7 @@ contract MultiSigOwnable {
 	/*
  	 *  Constants
  	 */
-	uint constant public MAX_OWNER_COUNT = 500;
+	uint256 constant public MAX_OWNER_COUNT = 50;
 
 	event OwnerAddition(address indexed owner);
 	event OwnerRemoval(address indexed owner);
@@ -107,7 +107,7 @@ contract MultiSigOwnable {
 	/// @return List of owner addresses.
 	function getOwners()
 	public
-	constant
+	view
 	returns (address[])
 	{
 		return owners;

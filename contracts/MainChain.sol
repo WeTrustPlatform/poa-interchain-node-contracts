@@ -10,8 +10,6 @@ contract MainChain is Freezable {
 	/*
 	 *  Events
 	 */
-	event Confirmation(address indexed sender, bytes32 indexed txHash);
-	event Submission(bytes32 indexed txHash);
 	event Execution(bytes32 indexed txHash);
 	event ExecutionFailure(bytes32 indexed txHash);
 	event Deposit(address indexed sender, address indexed to, uint value);
@@ -72,11 +70,8 @@ contract MainChain is Freezable {
 	{
 		require(!checkIfFrozen());
 		require(v.length >= required);
-		// check whether the msgHash signed has destination, value and data as the message
-		// if value/data is 0/empty, don't include that in the hash
-		bytes32 hashedTxParams;
-		// return keccak256(txHash, destination, value, data);
-		hashedTxParams = keccak256(txHash, destination, value, data);
+
+		bytes32 hashedTxParams = keccak256(txHash, destination, value, data);
 		require(hashedTxParams == msgHash);
 
 		// execute the transaction after all checking the signatures
