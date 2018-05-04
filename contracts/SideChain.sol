@@ -68,7 +68,7 @@ contract SideChain is Freezable {
 
 	/// @dev Allows an owner to confirm a transaction.
 	function confirmTransaction(bytes32 txHash)
-	public
+	internal
 	ownerExists(msg.sender)
 	{
 		require(!isSignedSC[txHash][msg.sender]);
