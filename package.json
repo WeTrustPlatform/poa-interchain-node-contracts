@@ -7,14 +7,12 @@
     "test": "test"
   },
   "devDependencies": {
-    "blueberry": "^0.5.0",
-    "bluebird": "^3.4.6",
-    "chai": "^3.5.0",
-    "co": "^4.6.0",
+    "chai": "^4.1.2",
     "eslint": "^3.12.2",
     "ethereumjs-testrpc": "6.0.2",
-    "scrypt": "^6.0.3",
-    "truffle": "4.1.5"
+    "ethereumjs-util": "^5.2.0",
+    "truffle": "4.1.5",
+    "web3-utils": "^1.0.0-beta.34"
   },
   "scripts": {
     "test": "truffle test"
