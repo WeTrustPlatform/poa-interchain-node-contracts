@@ -6,6 +6,10 @@ import './libs/Freezable.sol';
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
 /// @author Stefan George - <stefan.george@consensys.net>
 contract MainChain is Freezable {
+	/*
+	 * Version information
+	 */
+	uint8 public constant VERSION = 1;
 
 	/*
 	 *  Events
@@ -13,17 +17,32 @@ contract MainChain is Freezable {
 	event Execution(bytes32 indexed txHash);
 	event ExecutionFailure(bytes32 indexed txHash);
 	event Deposit(address indexed sender, address indexed to, uint value);
+	event BlackListed(bytes32 indexed txHash);
+	event UnBlackListed(bytes32 indexed txhash);
+	event EmergencyWithdrawal(bytes32 hashedParam, address indexed destination, uint256 value, bytes data);
 
 	/*
 	 *  Storage
 	 */
 	mapping (bytes32 => Transaction) public transactions;
+	mapping (bytes32 => EmergencyTx) public emergencyTxs;
+	mapping (address => mapping(address => bool)) public emergencyTxConfirmation;
+	mapping (bytes32 => bool) public isBlackListed;
 	uint256 public transactionCount;
 
 	struct Transaction {
 		address destination;
 		uint256 value;
 		bytes data;
+	}
+
+	struct EmergencyTx {
+		address destination;
+		uint256 value;
+		bytes data;
+		bool executed;
+		address[] confirmations;
+		mapping(address => bool) isConfirmed;
 	}
 
 	/*
@@ -40,6 +59,26 @@ contract MainChain is Freezable {
 		_;
 	}
 
+	modifier txNotBlackListed(bytes32 txHash) {
+		require(!isBlackListed[txHash]);
+		_;
+	}
+
+	modifier txBlackListed(bytes32 txHash) {
+		require(isBlackListed[txHash]);
+		_;
+	}
+
+	modifier onlyWhenNotFrozen() {
+		require(!checkIfFrozen());
+		_;
+	}
+
+	modifier onlyWhenFrozen() {
+		require(checkIfFrozen());
+		_;
+	}
+
 	/*
 	 * Public functions
 	 */
@@ -47,11 +86,11 @@ contract MainChain is Freezable {
 	/// @param _owners List of initial owners.
 	/// @param _required Number of required confirmations.
 	function MainChain(address[] _owners, uint8 _required) Freezable(_owners, _required)
-	public
+		public
 	{
 	}
 
-	function deposit(address to) notNull(to) payable public {
+	function deposit(address to) notNull(to) onlyWhenNotFrozen payable public {
 		require(msg.value > 0);
 		emit Deposit(msg.sender, to, msg.value);
 	}
@@ -61,17 +100,16 @@ contract MainChain is Freezable {
 	/// @param value Transaction ether value.
 	/// @param data Transaction data payload.
 	/// @return Returns transaction ID.
-	// @TODO we need to add a mechanism to allow owners to withdraw even when frozen
 	function submitTransaction(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s)
-	public
-	notNull(destination)
-	transactionDoesNotExists(txHash)
-	returns (bytes32)
+		public
+		notNull(destination)
+		transactionDoesNotExists(txHash)
+		onlyWhenNotFrozen
+		returns (bytes32)
 	{
-		require(!checkIfFrozen());
 		require(v.length >= required);
 
-		bytes32 hashedTxParams = keccak256(txHash, destination, value, data);
+		bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
 		require(hashedTxParams == msgHash);
 
 		// execute the transaction after all checking the signatures
@@ -139,10 +177,9 @@ contract MainChain is Freezable {
 	/// @param value Transaction ether value.
 	/// @param data Transaction data payload.
 	/// @return Returns transaction ID.
-	// @TODO we need to add mechanism to blacklist certain txHash
 	function addTransaction(bytes32 txHash, address destination, uint value, bytes data)
-	internal
-	notNull(destination)
+		internal
+		notNull(destination)
 	{
 		transactions[txHash] = Transaction({
 			destination: destination,
@@ -150,5 +187,59 @@ contract MainChain is Freezable {
 			data: data
 			});
 		transactionCount += 1;
+	}
+
+	// @TODO still needs to write test cases for addBlackList and removeBlackList
+	function addBlackList(bytes32 txHash)
+		public
+		onlyByWallet
+		txNotBlackListed(txHash)
+		onlyWhenNotFrozen
+	{
+		isBlackListed[txHash] = true;
+
+		emit BlackListed(txHash);
+	}
+
+	function removeBlackList(bytes32 txHash)
+		public
+		onlyByWallet
+		txBlackListed(txHash)
+		onlyWhenNotFrozen
+	{
+		isBlackListed[txHash] = false;
+
+		emit UnBlackListed(txHash);
+	}
+
+
+	//@dev A method to get the money out when the contract is frozen
+	// @TODO still need to write tests for emergency withdrawal
+	function emergencyWithdrawal(address destination, uint256 value, bytes data) ownerExists(msg.sender) onlyWhenFrozen public {
+		bytes32 hashedParam = keccak256(destination, value, data);
+
+		EmergencyTx storage transaction = emergencyTxs[hashedParam];
+
+		// store the param for audit sake
+		if (transaction.destination == address(0)) {
+			transaction.destination = destination;
+			transaction.value = value;
+			transaction.data = data;
+		}
+
+		require(!transaction.executed); // make sure the transaction is not executed
+		require(!transaction.isConfirmed[msg.sender]); // make sure the msg.sender is in the confirmed list
+
+		transaction.isConfirmed[msg.sender] = true;
+		transaction.confirmations.push(msg.sender);
+
+		if (transaction.confirmations.length >= required) {
+			if (external_call(destination, value, data.length, data)) {
+				transaction.executed = true;
+				emit EmergencyWithdrawal(hashedParam, destination, value, data);
+			} else {
+				emit ExecutionFailure(hashedParam);
+			}
+		}
 	}
 }

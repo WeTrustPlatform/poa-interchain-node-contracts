@@ -4,6 +4,12 @@ import './libs/MultiSigOwnable.sol';
 import './libs/Freezable.sol';
 
 contract SideChain is Freezable {
+
+	/*
+	 * Version information
+	 */
+	uint8 public constant version = 1;
+
 	/*
  	 *  Events
  	 */
