@@ -1,0 +1,35 @@
+{
+  "name": "wetrust-interchain-node",
+  "version": "0.0.1",
+  "description": "Interchain Node SmartContracts",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "blueberry": "^0.5.0",
+    "bluebird": "^3.4.6",
+    "chai": "^3.5.0",
+    "co": "^4.6.0",
+    "eslint": "^3.12.2",
+    "ethereumjs-testrpc": "6.0.2",
+    "scrypt": "^6.0.3",
+    "truffle": "3.4.11"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WeTrustPlatform/interchain-node.git"
+  },
+  "keywords": [
+    "interchainNode"
+  ],
+  "author": "WeTrust",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WeTrustPlatform/interchain-node/issues"
+  },
+  "homepage": "https://github.com/WeTrustPlatform/interchain-node#readme"
+}
