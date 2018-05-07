@@ -88,7 +88,7 @@ module.exports = {
 
     const msgHash = this.createMsgHash(txHash, toAddress, value, data);
 
-    const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), new Buffer(privateKey, 'hex'));
+    const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), Buffer.from(privateKey, 'hex'));
 
     return { msgHash: '0x' + msgHash, v: sig.v, r :'0x' + sig.r.toString('hex'), s: '0x' + sig.s.toString('hex')};
   },
@@ -101,7 +101,7 @@ module.exports = {
     const msgHash = this.createMsgHash(txHash, toAddress, value, data, version);
 
     for(let i = 0; i < arryOfUserIndexes.length; i++) {
-      const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), new Buffer(consts.PRIVATE_KEYS[arryOfUserIndexes[i]], 'hex'));
+      const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), Buffer.from(consts.PRIVATE_KEYS[arryOfUserIndexes[i]], 'hex'));
 
       v.push(sig.v);
       r.push('0x' + sig.r.toString('hex'));
