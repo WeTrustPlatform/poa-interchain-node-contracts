@@ -15,7 +15,7 @@
     "web3-utils": "^1.0.0-beta.34"
   },
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test && ./node_modules/.bin/solidity-coverage"
   },
   "repository": {
     "type": "git",

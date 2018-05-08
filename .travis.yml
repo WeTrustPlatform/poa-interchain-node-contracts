@@ -12,7 +12,6 @@ before_script:
   - echo $PWD
   - ls
   - ls ../.
-  - ./node_modules/.bin/solidity-coverage
 compiler:
   - gcc
   - clang
