@@ -25,16 +25,17 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
   });
 
   it("checks that removeOwner change requirements if ownersList is less than required after removing", async function () {
-    const ownersList = await ownableInstance.getOwners.call();
+    let ownersList = await ownableInstance.getOwners.call();
 
     let removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(ownersList[0]);
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
 
-    removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(ownersList[1]);
-
+    ownersList = await ownableInstance.getOwners.call();
+    removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(ownersList[0]);
     const res = await ownableInstance.callSelf(removeOwnerEncodedDataField);
-
+    console.log(res);
     const newOwnersList = await ownableInstance.getOwners.call();
+    console.log(newOwnersList);
     assert.equal(newOwnersList.length, 1);
 
     assert.equal(res.logs[0].event, 'RequirementChange');

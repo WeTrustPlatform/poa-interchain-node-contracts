@@ -8,7 +8,7 @@ contract SideChain is Freezable {
 	/*
 	 * Version information
 	 */
-	uint8 public constant version = 1;
+	uint8 public constant VERSION = 1;
 
 	/*
  	 *  Events
@@ -19,7 +19,7 @@ contract SideChain is Freezable {
 	event Execution(bytes32 indexed txHash);
 	event ExecutionFailure(bytes32 indexed txHash);
 	event Deposit(address indexed sender, address indexed to, uint value);
-	event signatureAdded(bytes32 txHash, uint8 v, bytes32 r, bytes32 s);
+	event SignatureAdded(bytes32 txHash, uint8 v, bytes32 r, bytes32 s);
 
 
 	modifier notNull(address _address) {
@@ -31,9 +31,9 @@ contract SideChain is Freezable {
 	mapping (bytes32 => mapping(address => bool)) isSignedSC;
 	uint256 sideChainTxCount;
 
-	mapping (bytes32 => Transaction) mainChainTx;
+	mapping (bytes32 => Transaction) mainChainTxs;
 	mapping (bytes32 => Signatures) mainChainSigs;
-	mapping (bytes32 => mapping(address => bool)) isSignedMC;
+	mapping (bytes32 => mapping(address => bool)) public isSignedMC;
 	uint256 mainChainTxCount;
 
 
@@ -222,20 +222,17 @@ contract SideChain is Freezable {
 	{
 		require(!isSignedMC[txHash][msg.sender]);
 
-		bytes32 hashedTxParams = keccak256(txHash, destination, value, data);
+		bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
 		require(hashedTxParams == msgHash);
 
-		if(mainChainTx[txHash].destination != address(0)){
-			require(mainChainTx[txHash].destination == destination);
-			require(mainChainTx[txHash].value == value);
-		} else {
+		if(mainChainTxs[txHash].destination == address(0)){
 			addTransactionMC(txHash, destination, value, data);
 		}
 
 		addSignatureMC(txHash, v, r, s);
 
 		isSignedMC[txHash][msg.sender] = true;
-		emit signatureAdded(txHash, v, r, s);
+		emit SignatureAdded(txHash, v, r, s);
 	}
 
 	function addSignatureMC(bytes32 txHash, uint8 v, bytes32 r, bytes32 s) internal {
@@ -245,10 +242,10 @@ contract SideChain is Freezable {
 	}
 
 	function addTransactionMC(bytes32 txHash, address destination, uint256 value, bytes data)
-	internal
-	notNull(destination)
+		internal
+		notNull(destination)
 	{
-		mainChainTx[txHash] = Transaction({
+		mainChainTxs[txHash] = Transaction({
 			destination: destination,
 			value: value,
 			executed: false,
@@ -257,8 +254,9 @@ contract SideChain is Freezable {
 		mainChainTxCount += 1;
 	}
 
-	function getTransactionMC(bytes32 txHash) public view returns (uint8[] v, bytes32[] r, bytes32[] s) {
-		require(mainChainTx[txHash].destination != address(0));
-		return (mainChainSigs[txHash].v, mainChainSigs[txHash].r, mainChainSigs[txHash].s);
+	function getTransactionMC(bytes32 txHash) view public returns (address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s) {
+		Transaction storage tempTx = mainChainTxs[txHash];
+		Signatures storage tempSigs = mainChainSigs[txHash];
+		return (tempTx.destination, tempTx.value, tempTx.data, tempSigs.v, tempSigs.r, tempSigs.s);
 	}
 }
