@@ -222,6 +222,9 @@ contract SideChain is Freezable {
 	{
 		require(!isSignedMC[txHash][msg.sender]);
 
+		address signer = ecrecover(msgHash, v, r, s);
+		require(msg.sender == signer);
+
 		bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
 		require(hashedTxParams == msgHash);
 

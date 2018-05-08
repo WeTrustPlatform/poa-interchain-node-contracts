@@ -65,9 +65,40 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
   });
 
   it("checks that signature is added properly to existing transaction object for non-first signature submission", async function () {
+    await sidechainInstance.submitSignatureMC(sigs.msgHash, txHash, toAddress, value, data, sigs.v[0], sigs.r[0], sigs.s[0]);
+    let tx = await sidechainInstance.getTransactionMC.call(txHash);
+    let v = tx[3];
+
+    // there should be one signature in the list
+    assert.equal(v.length, 1);
+
+    await sidechainInstance.submitSignatureMC(sigs.msgHash, txHash, toAddress, value, data, sigs.v[1], sigs.r[1], sigs.s[1], {from: accounts[1]});
+    tx = await sidechainInstance.getTransactionMC.call(txHash);
+
+    // we don't check v here because the value of v is always either 27 or 28
+    let r = tx[4];
+    let s = tx[5];
+
+    assert.ok(r.includes(sigs.r[1]));
+    assert.ok(s.includes(sigs.s[1]));
+  });
+
+  it("revert signature provided is not signed by the caller", async function () {
+    // should revert because it is calling from non owner account
+    const nonSigner = accounts[1];
+    const signer = accounts[0];
+    await utils.assertRevert(sidechainInstance.submitSignatureMC(sigs.msgHash, txHash, toAddress, value, data, sigs.v[0], sigs.r[0], sigs.s[0], {from: nonSigner}));
+
+    await sidechainInstance.submitSignatureMC(sigs.msgHash, txHash, toAddress, value, data, sigs.v[0], sigs.r[0], sigs.s[0], {from: signer});
   });
 
   it("revert if called from a non owner account", async function () {
+    // should revert because it is calling from non owner account
+    const nonOwner = accounts[9];
+    await utils.assertRevert(sidechainInstance.submitSignatureMC(sigs.msgHash, txHash, toAddress, value, data, sigs.v[0], sigs.r[0], sigs.s[0], {from: nonOwner}));
+
+    const owner = accounts[0];
+    await sidechainInstance.submitSignatureMC(sigs.msgHash, txHash, toAddress, value, data, sigs.v[0], sigs.r[0], sigs.s[0], {from: owner})
   });
 
   it("revert if destination address is null", async function () {
