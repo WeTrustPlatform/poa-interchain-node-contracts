@@ -10,11 +10,12 @@
     "chai": "^4.1.2",
     "eslint": "^3.12.2",
     "ethereumjs-util": "^5.2.0",
+    "solidity-coverage": "^0.5.0",
     "truffle": "4.1.5",
     "web3-utils": "^1.0.0-beta.34"
   },
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test && ./node_modules/.bin/solidity-coverage"
   },
   "repository": {
     "type": "git",

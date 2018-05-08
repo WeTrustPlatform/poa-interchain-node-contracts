@@ -52,7 +52,7 @@ contract ExampleToken {
 	}
 
 	// See ERC20
-	function balanceOf(address _owner) constant external returns (uint256) {
+	function balanceOf(address _owner) view external returns (uint256) {
 		return balances[_owner];
 	}
 
@@ -64,7 +64,7 @@ contract ExampleToken {
 	}
 
 	// See ERC20
-	function allowance(address _owner, address _spender) constant external returns (uint256) {
+	function allowance(address _owner, address _spender) view external returns (uint256) {
 		return allowed[_owner][_spender];
 	}
 }
