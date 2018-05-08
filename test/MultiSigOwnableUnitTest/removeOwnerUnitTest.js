@@ -24,6 +24,22 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     assert.notOk(newOwnersList.includes(accounts[0]));
   });
 
+  it("checks that removeOwner change requirements if ownersList is less than required after removing", async function () {
+    const ownersList = await ownableInstance.getOwners.call();
+
+    let removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(ownersList[0]);
+    await ownableInstance.callSelf(removeOwnerEncodedDataField);
+
+    removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(ownersList[1]);
+
+    const res = await ownableInstance.callSelf(removeOwnerEncodedDataField);
+
+    const newOwnersList = await ownableInstance.getOwners.call();
+    assert.equal(newOwnersList.length, 1);
+
+    assert.equal(res.logs[0].event, 'RequirementChange');
+  });
+
   it("revert if not called from the smart contract Address", async function () {
     const removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(accounts[5]);
     await utils.assertRevert(ownableInstance.sendTransaction({from: accounts[0], data: removeOwnerEncodedDataField}));
@@ -44,12 +60,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     assert.notOk(newOwnersList.includes(accounts[5]));
   });
 
-  it("revert if valid requirements aren't met", async function () {
-    /**
-     * valid requirements:
-     * - required <= ownerCount
-     * - ownerCount != 0;
-     */
+  it("revert if ownerCount is zero after removing an owner", async function () {
     //create 2 owner 2 required contract to test required <= ownerCount
     ownableInstance = await MultiSigOwnable.new(accounts.slice(0, 2), 2);
     let ownersList = await ownableInstance.getOwners.call();
@@ -59,12 +70,6 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     let removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(accounts[0]);
     // this should fail because required would be > ownerCount if we remove.
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
-    let newOwnersList = await ownableInstance.getOwners.call();
-
-    assert.equal(newOwnersList.length, 2);
-    assert.ok(newOwnersList.includes(accounts[0]));
-
-
     //create 1 owner 1 required contract to test ownerCount != 0
     ownableInstance = await MultiSigOwnable.new(accounts.slice(0, 1), 1);
     ownersList = await ownableInstance.getOwners.call();
@@ -73,7 +78,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(accounts[0]);
     // this should fail because ownerCount would become zero if we remove.
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
-    newOwnersList = await ownableInstance.getOwners.call();
+    const newOwnersList = await ownableInstance.getOwners.call();
 
     assert.equal(newOwnersList.length, 1);
     assert.ok(newOwnersList.includes(accounts[0]));

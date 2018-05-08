@@ -63,21 +63,24 @@ contract MultiSigOwnable {
 	/// @dev Allows to remove an owner. Transaction has to be sent by wallet.
 	/// @param owner Address of owner.
 	function removeOwner(address owner)
-	public
-	onlyByWallet
-	ownerExists(owner)
-	validRequirement(owners.length - 1, required)
+		public
+		onlyByWallet
+		ownerExists(owner)
 	{
 		isOwner[owner] = false;
-		for (uint i=0; i<owners.length - 1; i++)
+		for (uint i=0; i< owners.length - 1; i++) {
 			if (owners[i] == owner) {
-				owners[i] = owners[owners.length - 1];
+				owners[i] = owners[ owners.length - 1];
 				break;
 			}
-		owners.length -= 1;
+		}
 
-		if (required > owners.length)
+		owners.length -= 1;
+		require(owners.length > 0); // we don't want a wallet without any owner
+
+		if (required > owners.length) {
 			changeRequirement(uint8(owners.length)); // cast to uint8 is safe because MAX_OWNER_COUNT < 256
+		}
 
 		emit OwnerRemoval(owner);
 	}
@@ -86,10 +89,10 @@ contract MultiSigOwnable {
 	/// @param owner Address of owner to be replaced.
 	/// @param newOwner Address of new owner.
 	function replaceOwner(address owner, address newOwner)
-	public
-	onlyByWallet
-	ownerExists(owner)
-	ownerDoesNotExist(newOwner)
+		public
+		onlyByWallet
+		ownerExists(owner)
+		ownerDoesNotExist(newOwner)
 	{
 		for (uint i=0; i<owners.length; i++)
 			if (owners[i] == owner) {
@@ -116,9 +119,9 @@ contract MultiSigOwnable {
 	/// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
 	/// @param _required Number of required confirmations.
 	function changeRequirement(uint8 _required)
-	public
-	onlyByWallet
-	validRequirement(owners.length, _required)
+		public
+		onlyByWallet
+		validRequirement(owners.length, _required)
 	{
 		required = _required;
 		emit RequirementChange(_required);

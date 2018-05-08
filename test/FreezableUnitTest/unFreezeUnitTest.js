@@ -39,6 +39,32 @@ contract('Freezable: unFreeze Unit Test', function(accounts) {
     assert.notOk(hasUserApproved);
   });
 
+  it("checks that unFreeze doesn't unFreeze completely if approvalCount is > 1", async function () {
+    const user = accounts[0];
+    const user2 = accounts[1];
+
+    await freezableInstance.freeze({from: user});
+    await freezableInstance.freeze({from: user2});
+
+    let frozenAt = await freezableInstance.frozenAt.call();
+    let approvalCount = await freezableInstance.approvalCount.call();
+    let hasUserApproved = await freezableInstance.approval.call(user);
+
+    assert.notEqual(frozenAt.toNumber(), 0);
+    assert.equal(approvalCount.toNumber(), 2);
+    assert.ok(hasUserApproved);
+
+    await freezableInstance.unFreeze({from: user});
+
+    frozenAt = await freezableInstance.frozenAt.call();
+    approvalCount = await freezableInstance.approvalCount.call();
+    hasUserApproved = await freezableInstance.approval.call(user);
+
+    assert.notEqual(frozenAt.toNumber(), 0);
+    assert.equal(approvalCount.toNumber(), 1);
+    assert.notOk(hasUserApproved);
+  });
+
   it("revert if called from an not approved owner", async function () {
     const user = accounts[0];
 
