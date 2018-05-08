@@ -12,8 +12,12 @@ contract('MultiSigOwnable: replaceOwner Unit Test', function(accounts) {
   });
 
   it("checks that replaceOwner work as intended if all the condition are valid", async function () {
-    const replaceOwnerEncodedDataField = ownableInstance.contract.replaceOwner.getData(accounts[0], accounts[5]);
-    const res = await ownableInstance.callSelf(replaceOwnerEncodedDataField);
+    const replaceOwnerEncodedDataField = ownableInstance.contract.replaceOwner.getData(accounts[1], accounts[5]);
+    await ownableInstance.callSelf(replaceOwnerEncodedDataField);
+    const newOwnerList = await ownableInstance.getOwners.call();
+
+    assert.ok(newOwnerList.includes(accounts[5]));
+    assert.notOk(newOwnerList.includes(accounts[1]));
   });
 
   it("revert if not called from the smart contract Address", async function () {
@@ -49,14 +53,16 @@ contract('MultiSigOwnable: replaceOwner Unit Test', function(accounts) {
     assert.equal(res.logs.length, 0);
   });
 
-  it("checks that ownerAddition event is emitted properly", async function () {
+  it("checks that OwnerAddition event is emitted properly", async function () {
     const replaceOwnerEncodedDataField = ownableInstance.contract.replaceOwner.getData(accounts[0], accounts[5]);
     const res = await ownableInstance.callSelf(replaceOwnerEncodedDataField);
+    assert.equal(res.logs[1].event, 'OwnerAddition');
   });
 
-  it("checks that ownerRemoval event is emitted properly", async function () {
+  it("checks that OwnerRemoval event is emitted properly", async function () {
     const replaceOwnerEncodedDataField = ownableInstance.contract.replaceOwner.getData(accounts[0], accounts[5]);
     const res = await ownableInstance.callSelf(replaceOwnerEncodedDataField);
+    assert.equal(res.logs[0].event, 'OwnerRemoval');
   });
 
 });
