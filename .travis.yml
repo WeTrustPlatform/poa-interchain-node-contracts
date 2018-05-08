@@ -9,9 +9,7 @@ before_script:
   - sudo apt-get update
   - sudo apt-get install python3
   - npm install
-  - echo $PWD
-  - ls
-  - ls ../.
+  - ./node_modules/.bin/solidity-coverage
 compiler:
   - gcc
   - clang
