@@ -25,7 +25,7 @@ let sigs;
 let version;
 
 
-contract('MainChain: submitTransaction Unit Test', function(accounts) {
+contract('SideChain: submitSignature Unit Test', function(accounts) {
   beforeEach(async function () {
     sidechainInstance = await sidechain.new(accounts.slice(0, 3), 2);
     exampleTokenInstance = await exampleToken.new(accounts.slice(0, 4));
