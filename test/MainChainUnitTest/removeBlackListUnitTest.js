@@ -16,97 +16,90 @@ for (let i = 0; i < 10; i++) {
  * Default values for testing each test cases
  */
 let txHash;
+let txHash1;
 let toAddress;
 let value;
 let data;
 let version;
+let removeBlackListData;
+let sigs1;
+let res;
 
 contract('MainChain: removeBlackList Unit Test', function(accounts) {
   beforeEach(async function () {
     mainchainInstance = await mainchain.new(accounts.slice(0, 3), 2);
 
     txHash = txHashes[0];
-    toAddress = mainchainInstance.contract.address;
+    txHash1 = txHashes[1];
+    toAddress = mainchainInstance.address;
     value = 0;
     data = '';
     version = await mainchainInstance.VERSION.call();
     const addBlackListData = mainchainInstance.contract.addBlackList.getData(txHash);
-    let sigs = utils.multipleSignedTransaction([0, 1], txHash, toAddress, value, addBlackListData, version);
+    const sigs = utils.multipleSignedTransaction([0, 1], txHash, toAddress, value, addBlackListData, version);
     await mainchainInstance.submitTransaction(sigs.msgHash, txHash, toAddress, value, addBlackListData, sigs.v, sigs.r, sigs.s);
   });
 
   it("checks that removeBlackList work as intended if all the condition are valid", async function () {
     // check NotFrozen
-    let isFrozen = await mainchainInstance.checkIfFrozen.call();
+    const isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
 
     // check txBlackListed
-    assert.equal(await mainchainInstance.isBlackListed.call(txHash), true);
+    let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
+    assert.equal(txBlackListed, true);
 
     // check oulyByWallet
-    let txHash1 = txHashes[1];
-    const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
-    let sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
+    removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
+    sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
     await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s, {from: accounts[0]});
 
     // check txHash is removed from blacklist successfully
-    assert.equal(await mainchainInstance.isBlackListed.call(txHash), false);
+    txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
+    assert.equal(txBlackListed, false);
   });
 
   it("revert if not onlyByWallet", async function () {
-    let isFrozen = await mainchainInstance.checkIfFrozen.call();
+    const isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
-    assert.equal(await mainchainInstance.isBlackListed.call(txHash), true);
 
-    toAddress = accounts[0];
-    let txHash1 = txHashes[1];
+    let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
+    assert.equal(txBlackListed, true);
 
-    const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
-    let sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
-    let res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
+    const mainchainInstance1 = await mainchain.new(accounts.slice(0, 3), 2);
+    toAddress = mainchainInstance1.address;
+
+    removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
+    sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
+    res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
 
     // only 'Execucion' event is excuted, 'removeBlackList' is reverted.
     assert.equal(res.logs.length, 1);
+    // check txHash is still blacklisted.
+    txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
+    assert.equal(txBlackListed, true);
   });
 
   it("revert if tx is not blacklisted", async function () {
-    let isFrozen = await mainchainInstance.checkIfFrozen.call();
+    const isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
-    let txHash1 = txHashes[1];
 
-    // check txHash is not blacklisted.
-    assert.equal(await mainchainInstance.isBlackListed.call(txHash1), false);
+    // check txHash1 is not blacklisted.
+    let txBlackListed = await mainchainInstance.isBlackListed.call(txHash1);
+    assert.equal(txBlackListed, false);
 
-    const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash1);
-    let sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
-    let res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
+    removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash1);
+    sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
+    res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
 
     // only 'Execucion' event is excuted, 'removeBlackList' is reverted.
     assert.equal(res.logs.length, 1);
   });
 
-  it("revert if contract is frozen", async function () {
-    assert.equal(await mainchainInstance.isBlackListed.call(txHash), true);
-    let isFrozen = await mainchainInstance.checkIfFrozen.call();
-    assert.notOk(isFrozen);
-
-    await mainchainInstance.freeze();
-    isFrozen = await mainchainInstance.checkIfFrozen.call();
-    assert.ok(isFrozen);
-
-    let txHash1 = txHashes[1];
-
-    const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
-    let sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
-
-    await utils.assertRevert(mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s));
-  });
-
   it("checks that UnBlackListed event is emitted properly", async function () {
-    let txHash1 = txHashes[1];
-    const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
-    let sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
-    let res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
+    removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
+    sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
+    res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
 
     assert.equal(res.logs[0].event, 'UnBlackListed');
   });
