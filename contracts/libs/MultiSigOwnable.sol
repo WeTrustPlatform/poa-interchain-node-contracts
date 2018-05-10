@@ -2,15 +2,22 @@ pragma solidity ^0.4.0;
 
 contract MultiSigOwnable {
 
-	/*
- 	 *  Constants
- 	 */
+	//////////////////////
+	//	 CONSTANTS
+	/////////////////////
 	uint256 constant public MAX_OWNER_COUNT = 50;
 
+	//////////////////////
+	//	 EVENTS
+	/////////////////////
 	event OwnerAddition(address indexed owner);
 	event OwnerRemoval(address indexed owner);
 	event RequirementChange(uint8 required);
 
+
+	//////////////////////
+	//	 Modifiers
+	/////////////////////
 	modifier onlyByWallet() {
 		require(msg.sender == address(this));
 		_;
@@ -34,12 +41,22 @@ contract MultiSigOwnable {
 		_;
 	}
 
+	////////////////////////
+	//	 Storage Variables
+	////////////////////////
 	mapping (address => bool) public isOwner;
 	address[] public owners;
+	// number of Required Signatures to process transactions
 	uint8 public required;
 
-	function MultiSigOwnable(address[] _owners, uint8 _required) validRequirement(_owners.length, _required) public{
-		for (uint i=0; i <_owners.length; i++) {
+
+	/////////////////////////
+	//	 Public Functions
+	////////////////////////
+	function MultiSigOwnable(address[] _owners, uint8 _required)
+	  validRequirement(_owners.length, _required)
+	  public{
+		for (uint8 i = 0; i < _owners.length; i++) {
 			require(!isOwner[_owners[i]] && _owners[i] != 0);
 			isOwner[_owners[i]] = true;
 		}
@@ -50,11 +67,10 @@ contract MultiSigOwnable {
 	/// @dev Allows to add a new owner. Transaction has to be sent by wallet.
 	/// @param owner Address of new owner.
 	function addOwner(address owner)
-	public
-	onlyByWallet
-	ownerDoesNotExist(owner)
-	validRequirement(owners.length + 1, required)
-	{
+	  onlyByWallet
+	  ownerDoesNotExist(owner)
+	  validRequirement(owners.length + 1, required)
+	  public {
 		isOwner[owner] = true;
 		owners.push(owner);
 		emit OwnerAddition(owner);
@@ -63,10 +79,9 @@ contract MultiSigOwnable {
 	/// @dev Allows to remove an owner. Transaction has to be sent by wallet.
 	/// @param owner Address of owner.
 	function removeOwner(address owner)
-		public
-		onlyByWallet
-		ownerExists(owner)
-	{
+	  onlyByWallet
+	  ownerExists(owner)
+	  public {
 		isOwner[owner] = false;
 		for (uint i=0; i< owners.length - 1; i++) {
 			if (owners[i] == owner) {
@@ -89,11 +104,10 @@ contract MultiSigOwnable {
 	/// @param owner Address of owner to be replaced.
 	/// @param newOwner Address of new owner.
 	function replaceOwner(address owner, address newOwner)
-		public
-		onlyByWallet
-		ownerExists(owner)
-		ownerDoesNotExist(newOwner)
-	{
+	  onlyByWallet
+	  ownerExists(owner)
+	  ownerDoesNotExist(newOwner)
+	  public {
 		for (uint i=0; i<owners.length; i++)
 			if (owners[i] == owner) {
 				owners[i] = newOwner;
@@ -108,21 +122,16 @@ contract MultiSigOwnable {
 
 	/// @dev Returns list of owners.
 	/// @return List of owner addresses.
-	function getOwners()
-	public
-	view
-	returns (address[])
-	{
+	function getOwners() view public returns (address[]) {
 		return owners;
 	}
 
 	/// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
 	/// @param _required Number of required confirmations.
 	function changeRequirement(uint8 _required)
-		public
-		onlyByWallet
-		validRequirement(owners.length, _required)
-	{
+	  onlyByWallet
+	  validRequirement(owners.length, _required)
+	  public {
 		required = _required;
 		emit RequirementChange(_required);
 	}
