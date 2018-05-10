@@ -146,16 +146,6 @@ contract SideChain is Freezable {
 				count += 1;
 	}
 
-	/// @dev Returns list of owners.
-	/// @return List of owner addresses.
-	function getOwners()
-	public
-	constant
-	returns (address[])
-	{
-		return owners;
-	}
-
 	// @dev Returns array with owner addresses, which confirmed transaction.
 	/// @return Returns array of owner addresses.
 	function getSigners(bytes32 txHash)
