@@ -141,6 +141,31 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     await utils.assertRevert(mainchainInstance.submitTransaction(sigs.msgHash, txHash, toAddress, value, data, sigs.v, sigs.r, sigs.s));
   });
 
+  it("revert if transaction Hash is blackListed", async function () {
+    // add txHash to blackList.
+    const addBlackListData = mainchainInstance.contract.addBlackList.getData(txHash);
+    const addBlackListSigs = utils.multipleSignedTransaction([0, 1], txHashes[1], mainchainInstance.contract.address, 0, addBlackListData, version);
+    await mainchainInstance.submitTransaction(addBlackListSigs.msgHash, txHashes[1], mainchainInstance.contract.address, 0, addBlackListData, addBlackListSigs.v, addBlackListSigs.r, addBlackListSigs.s);
+    let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
+    assert.ok(txBlackListed);
+
+    // try to withdraw 1e6.
+    const user = '0x641cB10d9676e1E2B84d427ea160cE0866C01D20'; // an arbitary account that does not have any balance
+    const userBalanceBefore = web3.eth.getBalance(user);
+    const contractBalanceBefore = web3.eth.getBalance(mainchainInstance.address);
+    toAddress = user;
+    sigs = utils.multipleSignedTransaction([0, 1], txHash, toAddress, value, data, version);
+
+    // check transaction is reverted.
+    utils.assertRevert(mainchainInstance.submitTransaction(sigs.msgHash, txHash, toAddress, value, data, sigs.v, sigs.r, sigs.s, {from: accounts[0], gas: 1e6}));
+
+    const userBalanceAfter = web3.eth.getBalance(user);
+    const contractBalanceAfter = web3.eth.getBalance(mainchainInstance.address);
+
+    assert.equal(contractBalanceBefore - contractBalanceAfter, 0);
+    assert.equal(userBalanceAfter - userBalanceBefore, 0);
+  });
+
   it("revert if contract is frozen", async function () {
     let isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);

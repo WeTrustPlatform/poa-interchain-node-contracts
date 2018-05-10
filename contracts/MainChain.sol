@@ -104,6 +104,7 @@ contract MainChain is Freezable {
 		public
 		notNull(destination)
 		transactionDoesNotExists(txHash)
+		txNotBlackListed(txHash)
 		onlyWhenNotFrozen
 		returns (bytes32)
 	{
