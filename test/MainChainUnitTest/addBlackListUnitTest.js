@@ -61,16 +61,8 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.equal(txBlackListed, false);
 
-    const mainchainInstance1 = await mainchain.new(accounts.slice(0, 3), 2);
-    toAddress = mainchainInstance1.address;
-
-    addBlackListData = mainchainInstance.contract.addBlackList.getData(txHash);
-    sigs = utils.multipleSignedTransaction([0, 1], txHash, toAddress, value, addBlackListData, version);
-    res = await mainchainInstance.submitTransaction(sigs.msgHash, txHash, toAddress, value, addBlackListData, sigs.v, sigs.r, sigs.s);
-
-    // only 'Execucion' event is excuted, 'addBlackList' is reverted.
-    assert.equal(res.logs.length, 1);
-    // check txHash is not blacklisted.
+    await utils.assertRevert(mainchainInstance.addBlackList(txHash, {from: accounts[0]}));
+    
     txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.equal(txBlackListed, false);
   });

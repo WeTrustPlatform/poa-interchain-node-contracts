@@ -66,15 +66,8 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.equal(txBlackListed, true);
 
-    const mainchainInstance1 = await mainchain.new(accounts.slice(0, 3), 2);
-    toAddress = mainchainInstance1.address;
+    await utils.assertRevert(mainchainInstance.removeBlackList(txHash, {from: accounts[0]}));
 
-    removeBlackListData = mainchainInstance.contract.removeBlackList.getData(txHash);
-    sigs1 = utils.multipleSignedTransaction([0, 1], txHash1, toAddress, value, removeBlackListData, version);
-    res = await mainchainInstance.submitTransaction(sigs1.msgHash, txHash1, toAddress, value, removeBlackListData, sigs1.v, sigs1.r, sigs1.s);
-
-    // only 'Execucion' event is excuted, 'removeBlackList' is reverted.
-    assert.equal(res.logs.length, 1);
     // check txHash is still blacklisted.
     txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.equal(txBlackListed, true);
