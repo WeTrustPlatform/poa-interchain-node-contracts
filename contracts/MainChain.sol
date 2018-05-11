@@ -195,7 +195,7 @@ contract MainChain is Freezable {
 	/// @dev checks all the signatures and make sure they are from the owners
 	/// @param msgHash messageHash that signers singed
 	/// @param v , r, s signatures
-	/// @returns boolean
+	/// @return boolean
 	function hasEnoughRequiredSignatures(bytes32 msgHash, uint8[] v, bytes32[] r, bytes32[] s) view private returns(bool){
 		address[] memory confirmed = new address[](v.length);
 		uint8 confirmedCount;
