@@ -57,6 +57,9 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
     const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
 
+    // check EmergencyWithdrawal event is fired.
+    assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
+
     // check funds has been moved from mainchainInstance to destinationMainchainInstance.
     const contractBalanceAfter = web3.eth.getBalance(mainchainInstance.address);
     const desContractBalanceAfter = web3.eth.getBalance(toAddress);
@@ -67,12 +70,9 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
 
   it("checks that ERC20 Token emergency withdrawal works as intended if all the condition are valid", async function () {
     // send 1e7 exampleToken to the mainchainInstance first
-    await exampleTokenInstance.transfer(mainchainInstance.address, 10000, {from: accounts[0]});
+    await exampleTokenInstance.transfer(mainchainInstance.address, value, {from: accounts[0]});
     const contractBalanceBefore = await exampleTokenInstance.balanceOf.call(mainchainInstance.address);
     const desContractBalanceBefore = await exampleTokenInstance.balanceOf.call(toAddress);
-
-    console.log(contractBalanceBefore);
-    console.log(desContractBalanceBefore);
 
     // check mainchainInstance is fronzen.
     let isFrozen = await mainchainInstance.checkIfFrozen.call();
@@ -82,25 +82,18 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     assert.ok(isFrozen);
 
     // need approvals from 2 owners.
-    const transferEncodedData = exampleTokenInstance.contract.transfer.getData(toAddress, 100);
-    console.log(transferEncodedData);
-
+    const tokenAmount = 1000;
+    const transferEncodedData = exampleTokenInstance.contract.transfer.getData(toAddress, tokenAmount);
 
     await mainchainInstance.emergencyWithdrawal(toAddress, 0, transferEncodedData, {from: accounts[0]});
     const res = await mainchainInstance.emergencyWithdrawal(toAddress, 0, transferEncodedData, {from: accounts[1]});
-
-    // check EmergencyWithdrawal event is fired.
-    assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
 
     // check funds has been moved from mainchainInstance to destinationMainchainInstance.
     const contractBalanceAfter = await exampleTokenInstance.balanceOf.call(mainchainInstance.address);
     const desContractBalanceAfter = await exampleTokenInstance.balanceOf.call(toAddress);
 
-    console.log(contractBalanceAfter);
-    console.log(desContractBalanceAfter);
-
-    assert.equal(contractBalanceBefore - contractBalanceAfter, value);
-    assert.equal(desContractBalanceAfter - desContractBalanceBefore, value);
+    assert.equal(contractBalanceBefore - contractBalanceAfter, tokenAmount);
+    assert.equal(desContractBalanceAfter - desContractBalanceBefore, tokenAmount);
   });
 
 
