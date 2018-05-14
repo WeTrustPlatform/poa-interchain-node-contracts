@@ -61,6 +61,9 @@ contract MainChain is Freezable {
 	mapping (bytes32 => bool) public isBlackListed;
 	uint256 public transactionCount;
 
+	////////////////////////
+	//	 Structs
+	////////////////////////
 	struct Transaction {
 		address destination;
 		uint256 value;
@@ -87,6 +90,8 @@ contract MainChain is Freezable {
 	/// @param _required Number of required confirmations.
 	function MainChain(address[] _owners, uint8 _required) Freezable(_owners, _required) public {}
 
+	/// @dev Allows to deposit ETH into the contract
+	/// @param to the destination address where user wish to received the funds on sidechain
 	function deposit(address to)
 	  onlyWhenNotFrozen
 	  notNull(to)
