@@ -27,6 +27,13 @@ contract('MainChain: Deposit Unit Test', function(accounts) {
     assert.equal(res.logs.length, 1);
   });
 
+  it("revert if value is equal to 0", async function () {
+    utils.assertRevert(mainchainInstance.deposit(accounts[0], {from: accounts[0], value: 0}));
+    const res = await mainchainInstance.deposit(accounts[0], {from: accounts[0], value: 1e8 });
+
+    assert.equal(res.logs.length, 1);
+  });
+
   it("checks that deposited event is emitted properly", async function () {
     const res = await mainchainInstance.deposit(accounts[0], {from: accounts[0], value: 1e8 });
     const log = res.logs[0];
