@@ -54,9 +54,9 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     const desContractBalanceBefore = web3.eth.getBalance(toAddress);
 
     // need approvals from 2 owners.
-    const transferEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
-    await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
-    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
+    const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
+    await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]});
+    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[1]});
 
     // check EmergencyWithdrawal event is fired.
     assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
@@ -105,16 +105,16 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
 
-    const transferEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
-    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]}));
+    const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
+    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]}));
 
     // check when mainchainInstance is frozen, emergencyWithdrawal works as intended.
     await mainchainInstance.freeze();
     isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.ok(isFrozen);
 
-    await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
-    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
+    await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]});
+    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[1]});
 
     // check EmergencyWithdrawal event is fired.
     assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
@@ -122,12 +122,12 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
 
   it("revert if msg.sender is not owner", async function () {
     // one less signature than required
-    const transferEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
-    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[5]}));
+    const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
+    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[5]}));
 
     // check when msg.sender is owner, emergencyWithdrawal works as intended.
-    await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
-    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
+    await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]});
+    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[1]});
 
     // check EmergencyWithdrawal event is fired.
     assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
@@ -135,12 +135,12 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
 
   it("revert if there aren't enough valid signatures", async function () {
     // two of the same signature
-    const transferEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
-    await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
-    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]}));
+    const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
+    await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]});
+    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]}));
 
     // check when there are enough valid signatures, emergencyWithdrawal works as intended.
-    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
+    const res = await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[1]});
 
     // check EmergencyWithdrawal event is fired.
     assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
@@ -149,16 +149,16 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
   it("Check that ExecutionFailure is emitted when external_call fails", async function () {
     // Withdraw more amount than the contract holds so that external_call will fail.
     const contractBalance = web3.eth.getBalance(mainchainInstance.address);
-    value = contractBalance+1;
-    const transferEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
-    await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
-    let res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
+    value = contractBalance + 1;
+    const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
+    await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]});
+    let res = await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[1]});
 
     // check EmergencyFailure is emitted.
     assert.equal(res.logs[0].event, 'ExecutionFailure');
 
     // check when external_call successes, EmergencyWithdrawal is emitted.
-    value = contractBalance-1;
+    value = contractBalance - 1;
     const data = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
     await mainchainInstance.emergencyWithdrawal(toAddress, value, data, {from: accounts[0]});
     res = await mainchainInstance.emergencyWithdrawal(toAddress, value, data, {from: accounts[1]});
@@ -166,14 +166,14 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
   });
 
   it("Revert when transaction has already been executed.", async function () {
-    const transferEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
-    await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]});
-    let res = await mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[1]});
+    const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(toAddress, {from: mainchainInstance.address, value});
+    await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]});
+    let res = await mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[1]});
 
     // check transaction is executed successfully.
     assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
 
     // Revert when submit transaction twice.
-    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, transferEncodedData, {from: accounts[0]}));
+    await utils.assertRevert(mainchainInstance.emergencyWithdrawal(toAddress, value, depositEncodedData, {from: accounts[0]}));
   });
 });
