@@ -31,8 +31,8 @@ contract SideChain is Freezable {
 	////////////////////////
 	//	 Storage Variables
 	////////////////////////
-	mapping (bytes32 => Transaction) sideChainTx;
-	mapping (bytes32 => mapping(address => bool)) isSignedSC;
+	mapping (bytes32 => Transaction) public sideChainTx;
+	mapping (bytes32 => mapping(address => bool)) public isSignedSC;
 	uint256 sideChainTxCount;
 
 	mapping (bytes32 => Transaction) mainChainTxs;
@@ -81,17 +81,20 @@ contract SideChain is Freezable {
 	/// @param destination destination provided in deposit tx in main chain
 	/// @param value msg.value of deposit tx in main chain
 	/// @param data data of deposit tx in main chain
-	function submitTransactionSC(bytes32 txHash, address destination, uint256 value, bytes data) public {
+	function submitTransactionSC(bytes32 txHash, address destination, uint256 value, bytes data)
+		ownerExists(msg.sender)
+		public {
 		require(!isSignedSC[txHash][msg.sender]);
-
-		if(sideChainTx[txHash].destination != address(0)){
+		if (sideChainTx[txHash].destination == address(0)) {
+			addTransactionSC(txHash, destination, value, data);
+		} else {
 			require(sideChainTx[txHash].destination == destination);
 			require(sideChainTx[txHash].value == value);
-		} else {
-			addTransactionSC(txHash, destination, value, data);
+			require(sideChainTx[txHash].data == data);
 		}
-
 		isSignedSC[txHash][msg.sender] = true;
+		emit Confirmation(msg.sender, txHash);
+		executeTransaction(txHash);
 	}
 
 	/// @dev Allows an owner to revoke a confirmation for a transaction.
@@ -109,7 +112,6 @@ contract SideChain is Freezable {
 	/// @dev Allows anyone to execute a confirmed transaction.
 	/// @param txHash to be executed
 	function executeTransaction(bytes32 txHash)
-	  ownerExists(msg.sender)
 	  public {
 		require(isSignedSC[txHash][msg.sender]);
 		require(!sideChainTx[txHash].executed);
@@ -192,18 +194,6 @@ contract SideChain is Freezable {
 		sideChainTxCount += 1;
 	}
 
-	/// @dev Allows an owner to confirm a transaction.
-	/// @param txHash to be confirmed
-	function confirmTransaction(bytes32 txHash)
-	  ownerExists(msg.sender)
-	  private {
-		require(!isSignedSC[txHash][msg.sender]);
-		require(sideChainTx[txHash].destination != 0);
-		isSignedSC[txHash][msg.sender] = true;
-		emit Confirmation(msg.sender, txHash);
-		executeTransaction(txHash);
-	}
-
 	// call has been separated into its own function in order to take advantage
 	// of the Solidity's code generator to produce a loop that copies tx.data into memory.
 	function external_call(address destination, uint value, uint dataLength, bytes data) private returns(bool) {
@@ -275,8 +265,7 @@ contract SideChain is Freezable {
 	/// @param data Transaction data payload.
 	function addTransactionMC(bytes32 txHash, address destination, uint256 value, bytes data)
 	  notNull(destination)
-	  private
-	{
+	  private {
 		mainChainTxs[txHash] = Transaction({
 			destination: destination,
 			value: value,
