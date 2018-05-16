@@ -77,20 +77,30 @@ contract SideChain is Freezable {
 	}
 
 	/// @dev submit transaction to be processed pending the approvals
+	/// @param msgHash sha3 hash of txHash destination value data and VERSION
 	/// @param txHash transaction hash of the deposit tx in main chain
 	/// @param destination destination provided in deposit tx in main chain
 	/// @param value msg.value of deposit tx in main chain
 	/// @param data data of deposit tx in main chain
-	function submitTransactionSC(bytes32 txHash, address destination, uint256 value, bytes data)
+	/// @param v part of sig
+	/// @param r part of sig
+	/// @param s part of sig
+	function submitTransactionSC(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8 v, bytes32 r, bytes32 s)
 		ownerExists(msg.sender)
+		notNull(destination)
 		public {
 		require(!isSignedSC[txHash][msg.sender]);
 		if (sideChainTx[txHash].destination == address(0)) {
 			addTransactionSC(txHash, destination, value, data);
 		} else {
+			address signer = ecrecover(msgHash, v, r, s);
+			require(msg.sender == signer);
+
+			bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
+			require(hashedTxParams == msgHash);
+
 			require(sideChainTx[txHash].destination == destination);
 			require(sideChainTx[txHash].value == value);
-			require(sideChainTx[txHash].data == data);
 		}
 		isSignedSC[txHash][msg.sender] = true;
 		emit Confirmation(msg.sender, txHash);
