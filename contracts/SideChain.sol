@@ -90,15 +90,13 @@ contract SideChain is Freezable {
 		notNull(destination)
 		public {
 		require(!isSignedSC[txHash][msg.sender]);
+		address signer = ecrecover(msgHash, v, r, s);
+		require(msg.sender == signer);
+		bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
+		require(hashedTxParams == msgHash);
 		if (sideChainTx[txHash].destination == address(0)) {
 			addTransactionSC(txHash, destination, value, data);
 		} else {
-			address signer = ecrecover(msgHash, v, r, s);
-			require(msg.sender == signer);
-
-			bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
-			require(hashedTxParams == msgHash);
-
 			require(sideChainTx[txHash].destination == destination);
 			require(sideChainTx[txHash].value == value);
 		}
