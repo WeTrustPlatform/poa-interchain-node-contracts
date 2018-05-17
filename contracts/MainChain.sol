@@ -18,7 +18,6 @@ contract MainChain is Freezable {
 	event BlackListed(bytes32 indexed txHash);
 	event UnBlackListed(bytes32 indexed txhash);
 	event EmergencyWithdrawal(bytes32 hashedParam, address indexed destination, uint256 value, bytes data);
-	event test(bytes32 msgHash);
 
 	//////////////////////
 	//	 Modifiers
