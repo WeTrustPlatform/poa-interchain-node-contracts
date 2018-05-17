@@ -24,7 +24,7 @@ contract('SideChain: Deposit Unit Test', function(accounts) {
     assert.equal(newContractBalance.toNumber(), depositAmount);
   });
 
-  it("revert if owner address is zero address", async function () {
+  it("revert if toAddress is zero address", async function () {
     toAddress = consts.ZERO_ADDRESS;
     utils.assertRevert(sidechainInstance.deposit(toAddress, {from: accounts[0], value: depositAmount}));
 
