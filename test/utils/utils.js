@@ -82,11 +82,11 @@ module.exports = {
       return '0x' + toHex;
   },
 
-  signTransaction: function(userIndexOrPrivateKey, txHash, toAddress, value, data) {
+  signTransaction: function(userIndexOrPrivateKey, txHash, toAddress, value, data, version) {
     const privateKey = (typeof userIndexOrPrivateKey === 'number') ?
       consts.PRIVATE_KEYS[userIndexOrPrivateKey] : userIndexOrPrivateKey;
 
-    const msgHash = this.createMsgHash(txHash, toAddress, value, data);
+    const msgHash = this.createMsgHash(txHash, toAddress, value, data, version);
 
     const sig = ethUtils.ecsign(Buffer.from(msgHash, 'hex'), Buffer.from(privateKey, 'hex'));
 

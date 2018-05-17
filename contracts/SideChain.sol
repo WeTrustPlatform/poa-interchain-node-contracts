@@ -121,7 +121,6 @@ contract SideChain is Freezable {
 	/// @param txHash to be executed
 	function executeTransaction(bytes32 txHash)
 	  public {
-		require(isSignedSC[txHash][msg.sender]);
 		require(!sideChainTx[txHash].executed);
 		if (isConfirmed(txHash)) {
 			Transaction storage txn = sideChainTx[txHash];
