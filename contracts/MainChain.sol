@@ -18,6 +18,7 @@ contract MainChain is Freezable {
 	event BlackListed(bytes32 indexed txHash);
 	event UnBlackListed(bytes32 indexed txhash);
 	event EmergencyWithdrawal(bytes32 hashedParam, address indexed destination, uint256 value, bytes data);
+	event test(bytes32 msgHash);
 
 	//////////////////////
 	//	 Modifiers
@@ -102,7 +103,6 @@ contract MainChain is Freezable {
 	}
 
 	/// @dev submit a transaction to be processed
-	/// @param msgHash sha3 hash of txHash destination value data and VERSION
 	/// @param txHash transaction hash of the deposit tx in side chain
 	/// @param destination destination provided in deposit tx in side chain
 	/// @param value msg.value of deposit tx in side chain
@@ -110,7 +110,7 @@ contract MainChain is Freezable {
 	/// @param v list of v part of sig
 	/// @param r list of r part of sig
 	/// @param s list of s part of sig
-	function submitTransaction(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s)
+	function submitTransaction(bytes32 txHash, address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s)
 	  notNull(destination)
 	  transactionDoesNotExists(txHash)
 	  txNotBlackListed(txHash)
@@ -118,8 +118,7 @@ contract MainChain is Freezable {
 	  public {
 		require(v.length >= required);
 
-		bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
-		require(hashedTxParams == msgHash);
+		bytes32 msgHash = keccak256(byte(0x19), VERSION, address(this),txHash, destination, value, data);
 
 		// execute the transaction after all checking the signatures
 		require (hasEnoughRequiredSignatures(msgHash, v, r, s));
