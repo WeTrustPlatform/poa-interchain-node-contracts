@@ -128,7 +128,7 @@ contract('SideChain: submitTransactionSC Unit Test', function(accounts) {
   });
 
   it("revert if msg.sender is not owner", async function () {
-    const nonOwner = accounts[2];
+    const nonOwner = accounts[5];
     sigs = utils.signTransaction(0, txHash, toAddress, value, data, version);
     await utils.assertRevert(sidechainInstance.submitTransactionSC(sigs.msgHash, txHash, toAddress, value, data, sigs.v, sigs.r, sigs.s, {from: nonOwner}));
 
