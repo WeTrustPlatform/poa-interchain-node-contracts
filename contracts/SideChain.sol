@@ -44,6 +44,7 @@ contract SideChain is Freezable {
     //	 Structs
     ////////////////////////
     struct Transaction {
+        bytes32 msgHash;
         address destination;
         uint256 value;
         bytes data;
@@ -81,18 +82,20 @@ contract SideChain is Freezable {
 	/// @param destination destination provided in deposit tx in main chain
 	/// @param value msg.value of deposit tx in main chain
 	/// @param data data of deposit tx in main chain
-    function submitTransactionSC(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data)
+    function submitTransactionSC(bytes32 txHash, address destination, uint256 value, bytes data)
         ownerExists(msg.sender)
         notNull(destination)
         public {
         require(!isSignedSC[txHash][msg.sender]);
 
-        bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
-        require(hashedTxParams == msgHash);
+        bytes32 msgHash = keccak256(txHash, destination, value, data, VERSION);
 
         if (sideChainTx[txHash].destination == address(0)) {
-            addTransactionSC(txHash, destination, value, data);
+            addTransactionSC(msgHash, txHash, destination, value, data);
         }
+
+        // this validates that all the parameters are the same as the previous submitter
+        require(sideChainTx[txHash].msgHash == msgHash);
 
         isSignedSC[txHash][msg.sender] = true;
         emit Confirmation(msg.sender, txHash);
@@ -182,14 +185,16 @@ contract SideChain is Freezable {
 
 
     /// @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
+    /// @param msgHash keccek256 hash of the parameters
     /// @param txHash Transaction transactionHash
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
     /// @param data Transaction data payload.
-    function addTransactionSC(bytes32 txHash, address destination, uint value, bytes data)
+    function addTransactionSC(bytes32 msgHash, bytes32 txHash, address destination, uint value, bytes data)
       notNull(destination)
       private {
         sideChainTx[txHash] = Transaction({
+            msgHash: msgHash,
             destination: destination,
             value: value,
             executed: false,
