@@ -87,16 +87,25 @@ module.exports = {
     });
   },
 
-  createMsgHash: function(txHash, toAddress, value, data, version) {
+  createMsgHash: function(
+    contractAddress,
+    txHash,
+    toAddress,
+    value,
+    data,
+    version,
+  ) {
     const hexEncodedData = this.checkAndEncodeHexPrefix(data);
 
     return web3Uitl
       .soliditySha3(
+        { t: 'bytes', v: '0x19' },
+        { t: 'uint8', v: version },
+        { t: 'address', v: contractAddress },
         { t: 'bytes32', v: txHash },
         { t: 'address', v: toAddress },
         value,
         { t: 'bytes', v: hexEncodedData },
-        { t: 'uint8', v: version },
       )
       .substring(2);
   },
@@ -138,6 +147,7 @@ module.exports = {
 
   multipleSignedTransaction: function(
     arryOfUserIndexes,
+    contractAddress,
     txHash,
     toAddress,
     value,
@@ -148,7 +158,14 @@ module.exports = {
     const r = [];
     const s = [];
 
-    const msgHash = this.createMsgHash(txHash, toAddress, value, data, version);
+    const msgHash = this.createMsgHash(
+      contractAddress,
+      txHash,
+      toAddress,
+      value,
+      data,
+      version,
+    );
 
     for (let i = 0; i < arryOfUserIndexes.length; i++) {
       const sig = ethUtils.ecsign(

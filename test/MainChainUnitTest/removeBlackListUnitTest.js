@@ -18,6 +18,7 @@ let txHash;
 let toAddress;
 let value;
 let version;
+let contractAddress;
 
 contract('MainChain: removeBlackList Unit Test', function(accounts) {
   beforeEach(async function() {
@@ -27,11 +28,13 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     toAddress = mainchainInstance.address;
     value = 0;
     version = await mainchainInstance.VERSION.call();
+    contractAddress = mainchainInstance.address;
     const addBlackListData = mainchainInstance.contract.addBlackList.getData(
       txHash,
     );
     const sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -39,7 +42,6 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -65,6 +67,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     );
     const removeBlackListSigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHashes[1],
       toAddress,
       value,
@@ -72,7 +75,6 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      removeBlackListSigs.msgHash,
       txHashes[1],
       toAddress,
       value,
@@ -117,6 +119,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     );
     const removeBlackListSigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHashes[1],
       toAddress,
       value,
@@ -124,7 +127,6 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       version,
     );
     const res = await mainchainInstance.submitTransaction(
-      removeBlackListSigs.msgHash,
       txHashes[1],
       toAddress,
       value,
@@ -144,6 +146,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     );
     const sigs1 = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHashes[1],
       toAddress,
       value,
@@ -151,7 +154,6 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       version,
     );
     const res = await mainchainInstance.submitTransaction(
-      sigs1.msgHash,
       txHashes[1],
       toAddress,
       value,

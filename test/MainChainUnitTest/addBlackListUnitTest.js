@@ -18,6 +18,7 @@ let txHash;
 let toAddress;
 let value;
 let version;
+let contractAddress;
 
 contract('MainChain: addBlackList Unit Test', function(accounts) {
   beforeEach(async function() {
@@ -27,6 +28,7 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     toAddress = mainchainInstance.address;
     value = 0;
     version = await mainchainInstance.VERSION.call();
+    contractAddress = mainchainInstance.address;
   });
 
   it('checks that addBlackList work as intended if all the condition are valid', async function() {
@@ -44,6 +46,7 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     );
     const sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -51,7 +54,6 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -90,6 +92,7 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     );
     let sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -97,7 +100,6 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -114,6 +116,7 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     // const data = mainchainInstance.contract.addBlackList.getData(txHash);
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHashes[1],
       toAddress,
       value,
@@ -121,7 +124,6 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
       version,
     );
     const res = await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHashes[1],
       toAddress,
       value,
@@ -141,6 +143,7 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     );
     const sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -148,7 +151,6 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
       version,
     );
     const res = await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,

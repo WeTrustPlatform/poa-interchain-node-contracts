@@ -23,6 +23,7 @@ let value;
 let data;
 let sigs;
 let version;
+let contractAddress;
 
 contract('MainChain: submitTransaction Unit Test', function(accounts) {
   beforeEach(async function() {
@@ -39,6 +40,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     value = 1e6;
     data = '';
     version = await mainchainInstance.VERSION.call();
+    contractAddress = mainchainInstance.address;
   });
 
   it('checks that ETH withdrawal works as intended if all the condition are valid', async function() {
@@ -51,6 +53,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     toAddress = user;
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -58,7 +61,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -101,6 +103,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -108,7 +111,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -138,6 +140,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     value = 0;
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -145,7 +148,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     let res = await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -167,6 +169,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     txHash = txHashes[1]; // we need to use a different txHash for this to succeed
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -174,7 +177,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     res = await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -202,6 +204,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -209,7 +212,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -228,7 +230,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
   it('revert if transaction Hash already exits', async function() {
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -240,7 +241,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -260,6 +260,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     );
     const addBlackListSigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHashToBlackList,
       mainchainInstance.contract.address,
       0,
@@ -267,7 +268,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      addBlackListSigs.msgHash,
       txHashToBlackList,
       mainchainInstance.contract.address,
       0,
@@ -288,6 +288,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     toAddress = user;
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -298,7 +299,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     // check transaction is reverted.
     utils.assertRevert(
       mainchainInstance.submitTransaction(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -327,6 +327,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -335,7 +336,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     );
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -351,6 +351,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     // one less signature than required
     sigs = utils.multipleSignedTransaction(
       [0],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -359,7 +360,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     );
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -372,6 +372,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -379,7 +380,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -390,42 +390,11 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     );
   });
 
-  it("revert if the hash of the parameter doesn't equal to msgHash signed", async function() {
-    // use a different txHash than the one signed with
-    const msgHash = utils.createMsgHash(
-      txHashes[1],
-      toAddress,
-      value,
-      data,
-      version,
-    );
-
-    sigs = utils.multipleSignedTransaction(
-      [0, 1],
-      txHash,
-      toAddress,
-      value,
-      data,
-      version,
-    );
-    await utils.assertRevert(
-      mainchainInstance.submitTransaction(
-        msgHash,
-        txHash,
-        toAddress,
-        value,
-        data,
-        sigs.v,
-        sigs.r,
-        sigs.s,
-      ),
-    );
-  });
-
   it("revert if there aren't enough valid signatures", async function() {
     // two of the same signature
     sigs = utils.multipleSignedTransaction(
       [0, 0],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -434,7 +403,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     );
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -447,6 +415,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -454,7 +423,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -468,6 +436,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
   it('checks that Execution event is emitted properly', async function() {
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -475,7 +444,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     const res = await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -494,6 +462,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     sigs = utils.multipleSignedTransaction(
       [0, 1],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -501,7 +470,6 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       version,
     );
     const res = await mainchainInstance.submitTransaction(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,

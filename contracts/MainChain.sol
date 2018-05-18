@@ -101,25 +101,23 @@ contract MainChain is Freezable {
         emit Deposit(msg.sender, to, msg.value);
     }
 
-    /// @dev submit a transaction to be processed
-    /// @param msgHash sha3 hash of txHash destination value data and VERSION
-    /// @param txHash transaction hash of the deposit tx in side chain
-    /// @param destination destination provided in deposit tx in side chain
-    /// @param value msg.value of deposit tx in side chain
-    /// @param data data of deposit tx in side chain
-    /// @param v list of v part of sig
-    /// @param r list of r part of sig
-    /// @param s list of s part of sig
-    function submitTransaction(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s)
-      notNull(destination)
-      transactionDoesNotExists(txHash)
-      txNotBlackListed(txHash)
-      onlyWhenNotFrozen
-      public {
+	/// @dev submit a transaction to be processed
+	/// @param txHash transaction hash of the deposit tx in side chain
+	/// @param destination destination provided in deposit tx in side chain
+	/// @param value msg.value of deposit tx in side chain
+	/// @param data data of deposit tx in side chain
+	/// @param v list of v part of sig
+	/// @param r list of r part of sig
+	/// @param s list of s part of sig
+    function submitTransaction(bytes32 txHash, address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s)
+	  notNull(destination)
+	  transactionDoesNotExists(txHash)
+	  txNotBlackListed(txHash)
+	  onlyWhenNotFrozen
+	  public {
         require(v.length >= required);
 
-        bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
-        require(hashedTxParams == msgHash);
+        bytes32 msgHash = keccak256(byte(0x19), VERSION, address(this),txHash, destination, value, data);
 
         // execute the transaction after all checking the signatures
         require (hasEnoughRequiredSignatures(msgHash, v, r, s));
@@ -160,7 +158,6 @@ contract MainChain is Freezable {
     /// @param destination target destination
     /// @param value ether value
     /// @param data data payload
-    // @TODO still need to write tests for emergency withdrawal
     function emergencyWithdrawal(address destination, uint256 value, bytes data)
       onlyWhenFrozen
       ownerExists(msg.sender)

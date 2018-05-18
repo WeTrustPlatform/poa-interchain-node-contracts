@@ -34,11 +34,10 @@ contract MultiSigOwnable {
     }
 
     modifier validRequirement(uint ownerCount, uint8 _required) {
-        require(
-            ownerCount <= MAX_OWNER_COUNT
-            && _required <= ownerCount
-            && _required != 0
-            && ownerCount != 0);
+        require(ownerCount <= MAX_OWNER_COUNT);
+        require(_required <= ownerCount);
+        require(_required != 0);
+        require(ownerCount != 0);
         _;
     }
 
@@ -84,9 +83,9 @@ contract MultiSigOwnable {
         ownerExists(owner)
         public {
         isOwner[owner] = false;
-        for (uint i=0; i< owners.length - 1; i++) {
+        for (uint i = 0; i < owners.length - 1; i++) {
             if (owners[i] == owner) {
-                owners[i] = owners[ owners.length - 1];
+                owners[i] = owners[owners.length - 1];
                 break;
             }
         }

@@ -4,7 +4,6 @@ let utils = require('./../utils/utils');
 let consts = require('./../utils/consts');
 let web3Utils = require('web3-utils');
 let sidechain = artifacts.require('SideChain.sol');
-let exampleToken = artifacts.require('./test/ExampleToken.sol');
 
 let sidechainInstance;
 let txHashes = [];
@@ -22,19 +21,21 @@ let value;
 let data;
 let sigs;
 let version;
+let contractAddress;
 
 contract('SideChain: submitSignature Unit Test', function(accounts) {
   beforeEach(async function() {
     sidechainInstance = await sidechain.new(accounts.slice(0, 3), 2);
-    await exampleToken.new(accounts.slice(0, 4));
 
     txHash = txHashes[0];
     toAddress = accounts[1];
     value = 1e6;
     data = '';
     version = await sidechainInstance.VERSION.call();
+    contractAddress = sidechainInstance.address;
     sigs = utils.multipleSignedTransaction(
       [0, 1, 2, 3, 4, 5, 6],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -52,7 +53,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
     // we only need to submit one signature
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -80,7 +80,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
   it('checks that signature is added properly to existing transaction object for non-first signature submission', async function() {
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -96,7 +95,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     assert.equal(v.length, 1);
 
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -122,7 +120,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     const signer = accounts[0];
     await utils.assertRevert(
       sidechainInstance.submitSignatureMC(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -135,7 +132,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     );
 
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -152,7 +148,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     const nonOwner = accounts[9];
     await utils.assertRevert(
       sidechainInstance.submitSignatureMC(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -166,7 +161,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
     const owner = accounts[0];
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -182,6 +176,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     toAddress = consts.ZERO_ADDRESS;
     sigs = utils.multipleSignedTransaction(
       [0],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -191,7 +186,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
     await utils.assertRevert(
       sidechainInstance.submitSignatureMC(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -206,6 +200,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     toAddress = accounts[1];
     sigs = utils.multipleSignedTransaction(
       [0],
+      contractAddress,
       txHash,
       toAddress,
       value,
@@ -213,7 +208,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       version,
     );
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -226,7 +220,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
   it('revert if owner already submitted a signature', async function() {
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -249,7 +242,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     // try to submit the same signature again
     await utils.assertRevert(
       sidechainInstance.submitSignatureMC(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -265,7 +257,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
     toAddress = accounts[2]; // a different account than one used to create msgHash
     await utils.assertRevert(
       sidechainInstance.submitSignatureMC(
-        sigs.msgHash,
         txHash,
         toAddress,
         value,
@@ -278,7 +269,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
     toAddress = accounts[1]; // try to make sure it works with proper value
     await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,
@@ -291,7 +281,6 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
 
   it('checks that signatureAdded event is emitted properly', async function() {
     const res = await sidechainInstance.submitSignatureMC(
-      sigs.msgHash,
       txHash,
       toAddress,
       value,

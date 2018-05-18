@@ -53,7 +53,7 @@ contract Freezable is MultiSigOwnable {
         if (frozenAt == 0 || approvalCount == 0) return false;
         else {
             uint256 frozenDuration = minTimeFrozen * (frozenDurationRatio ** (approvalCount - 1));
-            if (now < (frozenAt + frozenDuration)) return true;
+            if (block.timestamp < (frozenAt + frozenDuration)) return true;
         }
         return false;
     }
@@ -85,8 +85,8 @@ contract Freezable is MultiSigOwnable {
         approvalCount++;
 
         if (frozenAt == 0) {
-            frozenAt = now;
-            emit contractFrozen(now);
+            frozenAt = block.timestamp;
+            emit contractFrozen(block.timestamp);
         }
     }
 
@@ -100,7 +100,7 @@ contract Freezable is MultiSigOwnable {
 
         if (approvalCount == 0) {
             frozenAt = 0;
-            emit contractUnFrozen(now);
+            emit contractUnFrozen(block.timestamp);
         }
     }
 }
