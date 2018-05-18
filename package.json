@@ -20,7 +20,7 @@
     "web3-utils": "^1.0.0-beta.34"
   },
   "scripts": {
-    "test": "truffle test && solidity-coverage",
+    "test": "solidity-coverage",
     "lint": "eslint test/**/*.js --fix && solium -d contracts/ --fix"
   },
   "repository": {
