@@ -31,11 +31,11 @@ contract SideChain is Freezable {
     ////////////////////////
     //	 Storage Variables
     ////////////////////////
-    mapping (bytes32 => Transaction) public sideChainTx;
+    mapping (bytes32 => SideChainTransaction) public sideChainTx;
     mapping (bytes32 => mapping(address => bool)) public isSignedSC;
     uint256 sideChainTxCount;
 
-    mapping (bytes32 => Transaction) mainChainTxs;
+    mapping (bytes32 => MainChainTransaction) mainChainTxs;
     mapping (bytes32 => Signatures) mainChainSigs;
     mapping (bytes32 => mapping(address => bool)) public isSignedMC;
     uint256 mainChainTxCount;
@@ -43,11 +43,19 @@ contract SideChain is Freezable {
     ////////////////////////
     //	 Structs
     ////////////////////////
-    struct Transaction {
+    struct SideChainTransaction {
+        bytes32 msgHash;
         address destination;
         uint256 value;
         bytes data;
         bool executed;
+    }
+
+
+    struct MainChainTransaction {
+        address destination;
+        uint256 value;
+        bytes data;
     }
 
     struct Signatures {
@@ -76,30 +84,26 @@ contract SideChain is Freezable {
         emit Deposit(msg.sender, to, msg.value);
     }
 
-    /// @dev submit transaction to be processed pending the approvals
-    /// @param msgHash sha3 hash of txHash destination value data and VERSION
-    /// @param txHash transaction hash of the deposit tx in main chain
-    /// @param destination destination provided in deposit tx in main chain
-    /// @param value msg.value of deposit tx in main chain
-    /// @param data data of deposit tx in main chain
-    /// @param v part of sig
-    /// @param r part of sig
-    /// @param s part of sig
-    function submitTransactionSC(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8 v, bytes32 r, bytes32 s)
+	/// @dev submit transaction to be processed pending the approvals
+	/// @param txHash transaction hash of the deposit tx in main chain
+	/// @param destination destination provided in deposit tx in main chain
+	/// @param value msg.value of deposit tx in main chain
+	/// @param data data of deposit tx in main chain
+    function submitTransactionSC(bytes32 txHash, address destination, uint256 value, bytes data)
         ownerExists(msg.sender)
         notNull(destination)
         public {
         require(!isSignedSC[txHash][msg.sender]);
-        address signer = ecrecover(msgHash, v, r, s);
-        require(msg.sender == signer);
-        bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
-        require(hashedTxParams == msgHash);
+
+        bytes32 msgHash = keccak256(txHash, destination, value, data, VERSION);
+
         if (sideChainTx[txHash].destination == address(0)) {
-            addTransactionSC(txHash, destination, value, data);
-        } else {
-            require(sideChainTx[txHash].destination == destination);
-            require(sideChainTx[txHash].value == value);
+            addTransactionSC(msgHash, txHash, destination, value, data);
         }
+
+        // this validates that all the parameters are the same as the previous submitter
+        require(sideChainTx[txHash].msgHash == msgHash);
+
         isSignedSC[txHash][msg.sender] = true;
         emit Confirmation(msg.sender, txHash);
         executeTransaction(txHash);
@@ -124,7 +128,7 @@ contract SideChain is Freezable {
         require(isSignedSC[txHash][msg.sender]);
         require(!sideChainTx[txHash].executed);
         if (isConfirmed(txHash)) {
-            Transaction storage txn = sideChainTx[txHash];
+            SideChainTransaction storage txn = sideChainTx[txHash];
             txn.executed = true;
             if (external_call(txn.destination, txn.value, txn.data.length, txn.data))
                 emit Execution(txHash);
@@ -142,7 +146,7 @@ contract SideChain is Freezable {
       public
       returns(bool) {
         uint count = 0;
-        for (uint i=0; i<owners.length; i++) {
+        for (uint i = 0; i<owners.length; i++) {
             if (isSignedSC[txHash][owners[i]])
                 count += 1;
             if (count == required)
@@ -156,7 +160,7 @@ contract SideChain is Freezable {
       view
       public
       returns(uint count) {
-        for (uint i=0; i<owners.length; i++) {
+        for (uint i = 0; i<owners.length; i++) {
             if (isSignedSC[txHash][owners[i]]) {
                 count += 1;
             }
@@ -172,13 +176,13 @@ contract SideChain is Freezable {
         address[] memory isSignedSCTemp = new address[](owners.length);
         uint count = 0;
         uint i;
-        for (i=0; i<owners.length; i++)
+        for (i = 0; i<owners.length; i++)
             if (isSignedSC[txHash][owners[i]]) {
                 isSignedSCTemp[count] = owners[i];
                 count += 1;
             }
         _isSignedSC = new address[](count);
-        for (i=0; i<count; i++)
+        for (i = 0; i<count; i++)
             _isSignedSC[i] = isSignedSCTemp[i];
     }
 
@@ -188,14 +192,16 @@ contract SideChain is Freezable {
 
 
     /// @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
+    /// @param msgHash keccek256 hash of the parameters
     /// @param txHash Transaction transactionHash
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
     /// @param data Transaction data payload.
-    function addTransactionSC(bytes32 txHash, address destination, uint value, bytes data)
+    function addTransactionSC(bytes32 msgHash, bytes32 txHash, address destination, uint value, bytes data)
       notNull(destination)
       private {
-        sideChainTx[txHash] = Transaction({
+        sideChainTx[txHash] = SideChainTransaction({
+            msgHash: msgHash,
             destination: destination,
             value: value,
             executed: false,
@@ -230,26 +236,24 @@ contract SideChain is Freezable {
     // SUBMIT SIGNATURES TO WITHDRAW ON MAINCHAIN
     //////////////////////////////////////////////
 
-    /// @dev store signature to be submitted in mainchain
-    /// @param msgHash sha3 hash of txHash destination value data and VERSION
-    /// @param txHash transaction hash of the deposit tx in side chain
-    /// @param destination destination provided in deposit tx in side chain
-    /// @param value msg.value of deposit tx in side chain
-    /// @param data data of deposit tx in side chain
-    /// @param v part of sig
-    /// @param r part of sig
-    /// @param s part of sig
-    function submitSignatureMC(bytes32 msgHash, bytes32 txHash, address destination, uint256 value, bytes data, uint8 v, bytes32 r, bytes32 s)
+	/// @dev store signature to be submitted in mainchain
+	/// @param txHash transaction hash of the deposit tx in side chain
+	/// @param destination destination provided in deposit tx in side chain
+	/// @param value msg.value of deposit tx in side chain
+	/// @param data data of deposit tx in side chain
+	/// @param v part of sig
+	/// @param r part of sig
+	/// @param s part of sig
+    function submitSignatureMC(bytes32 txHash, address destination, uint256 value, bytes data, uint8 v, bytes32 r, bytes32 s)
       ownerExists(msg.sender)
       notNull(destination)
       public {
         require(!isSignedMC[txHash][msg.sender]);
 
+        bytes32 msgHash = keccak256(byte(0x19), VERSION, address(this),txHash, destination, value, data);
+
         address signer = ecrecover(msgHash, v, r, s);
         require(msg.sender == signer);
-
-        bytes32 hashedTxParams = keccak256(txHash, destination, value, data, VERSION);
-        require(hashedTxParams == msgHash);
 
         if(mainChainTxs[txHash].destination == address(0)){
             addTransactionMC(txHash, destination, value, data);
@@ -276,10 +280,9 @@ contract SideChain is Freezable {
     function addTransactionMC(bytes32 txHash, address destination, uint256 value, bytes data)
       notNull(destination)
       private {
-        mainChainTxs[txHash] = Transaction({
+        mainChainTxs[txHash] = MainChainTransaction({
             destination: destination,
             value: value,
-            executed: false,
             data: data
             });
         mainChainTxCount += 1;
@@ -291,7 +294,7 @@ contract SideChain is Freezable {
       view
       public
       returns(address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s) {
-        Transaction storage tempTx = mainChainTxs[txHash];
+        MainChainTransaction storage tempTx = mainChainTxs[txHash];
         Signatures storage tempSigs = mainChainSigs[txHash];
         return (tempTx.destination, tempTx.value, tempTx.data, tempSigs.v, tempSigs.r, tempSigs.s);
     }
