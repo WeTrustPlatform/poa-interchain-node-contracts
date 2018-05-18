@@ -31,11 +31,11 @@ contract SideChain is Freezable {
     ////////////////////////
     //	 Storage Variables
     ////////////////////////
-    mapping (bytes32 => Transaction) public sideChainTx;
+    mapping (bytes32 => SideChainTransaction) public sideChainTx;
     mapping (bytes32 => mapping(address => bool)) public isSignedSC;
     uint256 sideChainTxCount;
 
-    mapping (bytes32 => Transaction) mainChainTxs;
+    mapping (bytes32 => MainChainTransaction) mainChainTxs;
     mapping (bytes32 => Signatures) mainChainSigs;
     mapping (bytes32 => mapping(address => bool)) public isSignedMC;
     uint256 mainChainTxCount;
@@ -43,12 +43,19 @@ contract SideChain is Freezable {
     ////////////////////////
     //	 Structs
     ////////////////////////
-    struct Transaction {
+    struct SideChainTransaction {
         bytes32 msgHash;
         address destination;
         uint256 value;
         bytes data;
         bool executed;
+    }
+
+
+    struct MainChainTransaction {
+        address destination;
+        uint256 value;
+        bytes data;
     }
 
     struct Signatures {
@@ -121,7 +128,7 @@ contract SideChain is Freezable {
         require(isSignedSC[txHash][msg.sender]);
         require(!sideChainTx[txHash].executed);
         if (isConfirmed(txHash)) {
-            Transaction storage txn = sideChainTx[txHash];
+            SideChainTransaction storage txn = sideChainTx[txHash];
             txn.executed = true;
             if (external_call(txn.destination, txn.value, txn.data.length, txn.data))
                 emit Execution(txHash);
@@ -193,7 +200,7 @@ contract SideChain is Freezable {
     function addTransactionSC(bytes32 msgHash, bytes32 txHash, address destination, uint value, bytes data)
       notNull(destination)
       private {
-        sideChainTx[txHash] = Transaction({
+        sideChainTx[txHash] = SideChainTransaction({
             msgHash: msgHash,
             destination: destination,
             value: value,
@@ -273,10 +280,9 @@ contract SideChain is Freezable {
     function addTransactionMC(bytes32 txHash, address destination, uint256 value, bytes data)
       notNull(destination)
       private {
-        mainChainTxs[txHash] = Transaction({
+        mainChainTxs[txHash] = MainChainTransaction({
             destination: destination,
             value: value,
-            executed: false,
             data: data
             });
         mainChainTxCount += 1;
@@ -288,7 +294,7 @@ contract SideChain is Freezable {
       view
       public
       returns(address destination, uint256 value, bytes data, uint8[] v, bytes32[] r, bytes32[] s) {
-        Transaction storage tempTx = mainChainTxs[txHash];
+        MainChainTransaction storage tempTx = mainChainTxs[txHash];
         Signatures storage tempSigs = mainChainSigs[txHash];
         return (tempTx.destination, tempTx.value, tempTx.data, tempSigs.v, tempSigs.r, tempSigs.s);
     }
