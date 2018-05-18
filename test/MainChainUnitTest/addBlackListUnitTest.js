@@ -1,7 +1,6 @@
-"use strict";
+'use strict';
 
 let utils = require('./../utils/utils');
-let consts = require('./../utils/consts');
 let web3Utils = require('web3-utils');
 let mainchain = artifacts.require('MainChain.sol');
 
@@ -18,23 +17,21 @@ for (let i = 0; i < 10; i++) {
 let txHash;
 let toAddress;
 let value;
-let data;
 let version;
 let contractAddress;
 
 contract('MainChain: addBlackList Unit Test', function(accounts) {
-  beforeEach(async function () {
+  beforeEach(async function() {
     mainchainInstance = await mainchain.new(accounts.slice(0, 3), 2);
 
     txHash = txHashes[0];
     toAddress = mainchainInstance.address;
     value = 0;
-    data = '';
     version = await mainchainInstance.VERSION.call();
     contractAddress = mainchainInstance.address;
   });
 
-  it("checks that addBlackList work as intended if all the condition are valid", async function () {
+  it('checks that addBlackList work as intended if all the condition are valid', async function() {
     // check NotFrozen
     const isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
@@ -44,52 +41,124 @@ contract('MainChain: addBlackList Unit Test', function(accounts) {
     assert.notOk(txBlackListed);
 
     // check oulyByWallet
-    const addBlackListData = mainchainInstance.contract.addBlackList.getData(txHash);
-    const sigs = utils.multipleSignedTransaction([0, 1], contractAddress, txHash, toAddress, value, addBlackListData, version);
-    await mainchainInstance.submitTransaction(txHash, toAddress, value, addBlackListData, sigs.v, sigs.r, sigs.s);
+    const addBlackListData = mainchainInstance.contract.addBlackList.getData(
+      txHash,
+    );
+    const sigs = utils.multipleSignedTransaction(
+      [0, 1],
+      contractAddress,
+      txHash,
+      toAddress,
+      value,
+      addBlackListData,
+      version,
+    );
+    await mainchainInstance.submitTransaction(
+      txHash,
+      toAddress,
+      value,
+      addBlackListData,
+      sigs.v,
+      sigs.r,
+      sigs.s,
+    );
 
     // check txHash is added to blacklist successfully
     txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.ok(txBlackListed);
   });
 
-  it("revert if not onlyByWallet", async function () {
+  it('revert if not onlyByWallet', async function() {
     const isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
 
     let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.notOk(txBlackListed);
 
-    await utils.assertRevert(mainchainInstance.addBlackList(txHash, {from: accounts[0]}));
+    await utils.assertRevert(
+      mainchainInstance.addBlackList(txHash, { from: accounts[0] }),
+    );
 
     txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.notOk(txBlackListed);
   });
 
-  it("revert if tx is blacklisted", async function () {
+  it('revert if tx is blacklisted', async function() {
     const isFrozen = await mainchainInstance.checkIfFrozen.call();
     assert.notOk(isFrozen);
 
-    let addBlackListData = mainchainInstance.contract.addBlackList.getData(txHash);
-    let sigs = utils.multipleSignedTransaction([0, 1], contractAddress, txHash, toAddress, value, addBlackListData, version);
-    await mainchainInstance.submitTransaction(txHash, toAddress, value, addBlackListData, sigs.v, sigs.r, sigs.s);
+    let addBlackListData = mainchainInstance.contract.addBlackList.getData(
+      txHash,
+    );
+    let sigs = utils.multipleSignedTransaction(
+      [0, 1],
+      contractAddress,
+      txHash,
+      toAddress,
+      value,
+      addBlackListData,
+      version,
+    );
+    await mainchainInstance.submitTransaction(
+      txHash,
+      toAddress,
+      value,
+      addBlackListData,
+      sigs.v,
+      sigs.r,
+      sigs.s,
+    );
 
     // check txHash is already blacklisted.
     let txBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.ok(txBlackListed);
 
     // const data = mainchainInstance.contract.addBlackList.getData(txHash);
-    sigs = utils.multipleSignedTransaction([0, 1], contractAddress, txHashes[1], toAddress, value, addBlackListData, version);
-    const res = await mainchainInstance.submitTransaction(txHashes[1], toAddress, value, addBlackListData, sigs.v, sigs.r, sigs.s);
+    sigs = utils.multipleSignedTransaction(
+      [0, 1],
+      contractAddress,
+      txHashes[1],
+      toAddress,
+      value,
+      addBlackListData,
+      version,
+    );
+    const res = await mainchainInstance.submitTransaction(
+      txHashes[1],
+      toAddress,
+      value,
+      addBlackListData,
+      sigs.v,
+      sigs.r,
+      sigs.s,
+    );
 
     // only 'Execucion' event is excuted, 'addBlackList' is reverted.
     assert.equal(res.logs.length, 1);
   });
 
-  it("checks that BlackListed event is emitted properly", async function () {
-    const addBlackListData = mainchainInstance.contract.addBlackList.getData(txHash);
-    const sigs = utils.multipleSignedTransaction([0, 1], contractAddress, txHash, toAddress, value, addBlackListData, version);
-    const res = await mainchainInstance.submitTransaction(txHash, toAddress, value, addBlackListData, sigs.v, sigs.r, sigs.s);
+  it('checks that BlackListed event is emitted properly', async function() {
+    const addBlackListData = mainchainInstance.contract.addBlackList.getData(
+      txHash,
+    );
+    const sigs = utils.multipleSignedTransaction(
+      [0, 1],
+      contractAddress,
+      txHash,
+      toAddress,
+      value,
+      addBlackListData,
+      version,
+    );
+    const res = await mainchainInstance.submitTransaction(
+      txHash,
+      toAddress,
+      value,
+      addBlackListData,
+      sigs.v,
+      sigs.r,
+      sigs.s,
+    );
 
     assert.equal(res.logs[0].event, 'BlackListed');
   });
