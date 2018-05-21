@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Interchain Node SmartContracts",
   "main": "index.js",
+  "engine": {
+    "node": "^8.11.2"
+  },
   "directories": {
     "test": "test"
   },
