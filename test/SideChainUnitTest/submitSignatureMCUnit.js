@@ -40,7 +40,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
   });
 
@@ -59,7 +59,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       data,
       sigs.v[0],
       sigs.r[0],
-      sigs.s[0],
+      sigs.s[0]
     );
 
     tx = await sidechainInstance.getTransactionMC.call(txHash);
@@ -86,7 +86,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       data,
       sigs.v[0],
       sigs.r[0],
-      sigs.s[0],
+      sigs.s[0]
     );
     let tx = await sidechainInstance.getTransactionMC.call(txHash);
     let v = tx[3];
@@ -102,7 +102,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       sigs.v[1],
       sigs.r[1],
       sigs.s[1],
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
     tx = await sidechainInstance.getTransactionMC.call(txHash);
 
@@ -127,8 +127,8 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
         sigs.v[0],
         sigs.r[0],
         sigs.s[0],
-        { from: nonSigner },
-      ),
+        { from: nonSigner }
+      )
     );
 
     await sidechainInstance.submitSignatureMC(
@@ -139,7 +139,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       sigs.v[0],
       sigs.r[0],
       sigs.s[0],
-      { from: signer },
+      { from: signer }
     );
   });
 
@@ -155,8 +155,8 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
         sigs.v[0],
         sigs.r[0],
         sigs.s[0],
-        { from: nonOwner },
-      ),
+        { from: nonOwner }
+      )
     );
 
     const owner = accounts[0];
@@ -168,7 +168,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       sigs.v[0],
       sigs.r[0],
       sigs.s[0],
-      { from: owner },
+      { from: owner }
     );
   });
 
@@ -181,7 +181,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
 
     await utils.assertRevert(
@@ -192,8 +192,8 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
         data,
         sigs.v[0],
         sigs.r[0],
-        sigs.s[0],
-      ),
+        sigs.s[0]
+      )
     );
 
     // test with valid conditions to see if it passes
@@ -205,7 +205,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await sidechainInstance.submitSignatureMC(
       txHash,
@@ -214,7 +214,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       data,
       sigs.v[0],
       sigs.r[0],
-      sigs.s[0],
+      sigs.s[0]
     );
   });
 
@@ -226,7 +226,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       data,
       sigs.v[0],
       sigs.r[0],
-      sigs.s[0],
+      sigs.s[0]
     );
 
     // checks that signature submission works
@@ -248,8 +248,8 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
         data,
         sigs.v[0],
         sigs.r[0],
-        sigs.s[0],
-      ),
+        sigs.s[0]
+      )
     );
   });
 
@@ -263,8 +263,8 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
         data,
         sigs.v[0],
         sigs.r[0],
-        sigs.s[0],
-      ),
+        sigs.s[0]
+      )
     );
 
     toAddress = accounts[1]; // try to make sure it works with proper value
@@ -275,7 +275,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       data,
       sigs.v[0],
       sigs.r[0],
-      sigs.s[0],
+      sigs.s[0]
     );
   });
 
@@ -287,7 +287,7 @@ contract('SideChain: submitSignature Unit Test', function(accounts) {
       data,
       sigs.v[0],
       sigs.r[0],
-      sigs.s[0],
+      sigs.s[0]
     );
     const log = res.logs[0];
 

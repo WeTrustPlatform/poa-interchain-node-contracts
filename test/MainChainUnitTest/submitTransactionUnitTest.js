@@ -30,7 +30,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     mainchainInstance = await mainchain.new(accounts.slice(0, 3), 2);
     await mainchainInstance.deposit(accounts[0], {
       from: accounts[0],
-      value: 1e7,
+      value: 1e7
     }); // put 0.1 ether in so we can test withdrawal
 
     exampleTokenInstance = await exampleToken.new(accounts.slice(0, 4));
@@ -47,7 +47,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     const user = '0x641cB10d9676e1E2B84d427ea160cE0866C01D20'; // an arbitary account that does not have any balance
     const userBalanceBefore = web3.eth.getBalance(user);
     const contractBalanceBefore = web3.eth.getBalance(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
 
     toAddress = user;
@@ -58,7 +58,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHash,
@@ -68,7 +68,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       sigs.v,
       sigs.r,
       sigs.s,
-      { from: accounts[0], gas: 1e6 },
+      { from: accounts[0], gas: 1e6 }
     );
 
     const userBalanceAfter = web3.eth.getBalance(user);
@@ -83,13 +83,13 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     // send some eth to the mainchainInstance first
     await exampleTokenInstance.transfer(mainchainInstance.address, 1e8, {
-      from: accounts[0],
+      from: accounts[0]
     });
 
     const tokenAmount = 1000;
     const tokenTransferEncodedData = exampleTokenInstance.contract.transfer.getData(
       user,
-      tokenAmount,
+      tokenAmount
     );
 
     toAddress = exampleTokenInstance.address;
@@ -98,7 +98,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
 
     const userBalanceBefore = await exampleTokenInstance.balanceOf.call(user);
     const contractBalanceBefore = await exampleTokenInstance.balanceOf.call(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
 
     sigs = utils.multipleSignedTransaction(
@@ -108,7 +108,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHash,
@@ -117,12 +117,12 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
 
     const userBalanceAfter = await exampleTokenInstance.balanceOf.call(user);
     const contractBalanceAfter = await exampleTokenInstance.balanceOf.call(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
 
     assert.equal(contractBalanceBefore - contractBalanceAfter, tokenAmount);
@@ -145,7 +145,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     let res = await mainchainInstance.submitTransaction(
       txHash,
@@ -154,7 +154,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
     let log = res.logs[0];
 
@@ -174,7 +174,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     res = await mainchainInstance.submitTransaction(
       txHash,
@@ -183,7 +183,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
     log = res.logs[0];
 
@@ -209,7 +209,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHash,
@@ -218,7 +218,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
 
     transaction = await mainchainInstance.transactions.call(txHash);
@@ -236,7 +236,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
 
     await utils.assertRevert(
@@ -247,8 +247,8 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
         data,
         sigs.v,
         sigs.r,
-        sigs.s,
-      ),
+        sigs.s
+      )
     );
   });
 
@@ -256,7 +256,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     // add txHash to blackList.
     const txHashToBlackList = txHashes[1];
     const addBlackListData = mainchainInstance.contract.addBlackList.getData(
-      txHash,
+      txHash
     );
     const addBlackListSigs = utils.multipleSignedTransaction(
       [0, 1],
@@ -265,7 +265,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       mainchainInstance.contract.address,
       0,
       addBlackListData,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHashToBlackList,
@@ -274,7 +274,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       addBlackListData,
       addBlackListSigs.v,
       addBlackListSigs.r,
-      addBlackListSigs.s,
+      addBlackListSigs.s
     );
     let istxBlackListed = await mainchainInstance.isBlackListed.call(txHash);
     assert.ok(istxBlackListed);
@@ -283,7 +283,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
     const user = '0x641cB10d9676e1E2B84d427ea160cE0866C01D20'; // an arbitary account that does not have any balance
     const userBalanceBefore = web3.eth.getBalance(user);
     const contractBalanceBefore = web3.eth.getBalance(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
     toAddress = user;
     sigs = utils.multipleSignedTransaction(
@@ -293,7 +293,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
 
     // check transaction is reverted.
@@ -306,8 +306,8 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
         sigs.v,
         sigs.r,
         sigs.s,
-        { from: accounts[0], gas: 1e6 },
-      ),
+        { from: accounts[0], gas: 1e6 }
+      )
     );
 
     const userBalanceAfter = web3.eth.getBalance(user);
@@ -332,7 +332,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
@@ -342,8 +342,8 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
         data,
         sigs.v,
         sigs.r,
-        sigs.s,
-      ),
+        sigs.s
+      )
     );
   });
 
@@ -356,7 +356,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
@@ -366,8 +366,8 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
         data,
         sigs.v,
         sigs.r,
-        sigs.s,
-      ),
+        sigs.s
+      )
     );
 
     sigs = utils.multipleSignedTransaction(
@@ -377,7 +377,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHash,
@@ -386,7 +386,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
   });
 
@@ -399,7 +399,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await utils.assertRevert(
       mainchainInstance.submitTransaction(
@@ -409,8 +409,8 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
         data,
         sigs.v,
         sigs.r,
-        sigs.s,
-      ),
+        sigs.s
+      )
     );
 
     sigs = utils.multipleSignedTransaction(
@@ -420,7 +420,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHash,
@@ -429,7 +429,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
   });
 
@@ -441,7 +441,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     const res = await mainchainInstance.submitTransaction(
       txHash,
@@ -450,7 +450,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
     const log = res.logs[0];
 
@@ -467,7 +467,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       toAddress,
       value,
       data,
-      version,
+      version
     );
     const res = await mainchainInstance.submitTransaction(
       txHash,
@@ -476,7 +476,7 @@ contract('MainChain: submitTransaction Unit Test', function(accounts) {
       data,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
     const log = res.logs[0];
 

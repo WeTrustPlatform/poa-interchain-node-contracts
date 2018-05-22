@@ -30,7 +30,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     version = await mainchainInstance.VERSION.call();
     contractAddress = mainchainInstance.address;
     const addBlackListData = mainchainInstance.contract.addBlackList.getData(
-      txHash,
+      txHash
     );
     const sigs = utils.multipleSignedTransaction(
       [0, 1],
@@ -39,7 +39,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       toAddress,
       value,
       addBlackListData,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHash,
@@ -48,7 +48,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       addBlackListData,
       sigs.v,
       sigs.r,
-      sigs.s,
+      sigs.s
     );
   });
 
@@ -63,7 +63,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
 
     // check oulyByWallet
     const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(
-      txHash,
+      txHash
     );
     const removeBlackListSigs = utils.multipleSignedTransaction(
       [0, 1],
@@ -72,7 +72,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       toAddress,
       value,
       removeBlackListData,
-      version,
+      version
     );
     await mainchainInstance.submitTransaction(
       txHashes[1],
@@ -82,7 +82,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       removeBlackListSigs.v,
       removeBlackListSigs.r,
       removeBlackListSigs.s,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
 
     // check txHash is removed from blacklist successfully
@@ -98,7 +98,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     assert.ok(txBlackListed);
 
     await utils.assertRevert(
-      mainchainInstance.removeBlackList(txHash, { from: accounts[0] }),
+      mainchainInstance.removeBlackList(txHash, { from: accounts[0] })
     );
 
     // check txHash is still blacklisted.
@@ -115,7 +115,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
     assert.notOk(txBlackListed);
 
     const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(
-      txHashes[1],
+      txHashes[1]
     );
     const removeBlackListSigs = utils.multipleSignedTransaction(
       [0, 1],
@@ -124,7 +124,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       toAddress,
       value,
       removeBlackListData,
-      version,
+      version
     );
     const res = await mainchainInstance.submitTransaction(
       txHashes[1],
@@ -133,7 +133,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       removeBlackListData,
       removeBlackListSigs.v,
       removeBlackListSigs.r,
-      removeBlackListSigs.s,
+      removeBlackListSigs.s
     );
 
     // only 'Execucion' event is excuted, 'removeBlackList' is reverted.
@@ -142,7 +142,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
 
   it('checks that UnBlackListed event is emitted properly', async function() {
     const removeBlackListData = mainchainInstance.contract.removeBlackList.getData(
-      txHash,
+      txHash
     );
     const sigs1 = utils.multipleSignedTransaction(
       [0, 1],
@@ -151,7 +151,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       toAddress,
       value,
       removeBlackListData,
-      version,
+      version
     );
     const res = await mainchainInstance.submitTransaction(
       txHashes[1],
@@ -160,7 +160,7 @@ contract('MainChain: removeBlackList Unit Test', function(accounts) {
       removeBlackListData,
       sigs1.v,
       sigs1.r,
-      sigs1.s,
+      sigs1.s
     );
 
     assert.equal(res.logs[0].event, 'UnBlackListed');

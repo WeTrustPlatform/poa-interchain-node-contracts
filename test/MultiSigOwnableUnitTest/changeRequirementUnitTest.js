@@ -15,7 +15,7 @@ contract('MultiSigOwnable: changeRequirement Unit Test', function(accounts) {
     assert.equal(requirement.toNumber(), 2);
 
     const changeRequirementEncodedDataField = ownableInstance.contract.changeRequirement.getData(
-      3,
+      3
     );
     await ownableInstance.callSelf(changeRequirementEncodedDataField);
     const newRequirement = await ownableInstance.required.call();
@@ -25,17 +25,17 @@ contract('MultiSigOwnable: changeRequirement Unit Test', function(accounts) {
 
   it('revert if not called from the smart contract Address', async function() {
     const changeRequirementEncodedDataField = ownableInstance.contract.changeRequirement.getData(
-      3,
+      3
     );
     await utils.assertRevert(
       ownableInstance.sendTransaction({
         from: accounts[0],
-        data: changeRequirementEncodedDataField,
-      }),
+        data: changeRequirementEncodedDataField
+      })
     );
 
     const res = await ownableInstance.callSelf(
-      changeRequirementEncodedDataField,
+      changeRequirementEncodedDataField
     );
     const log = res.logs[0];
 
@@ -52,7 +52,7 @@ contract('MultiSigOwnable: changeRequirement Unit Test', function(accounts) {
     const ownerList = await ownableInstance.getOwners.call();
 
     let changeRequirementEncodedDataField = ownableInstance.contract.changeRequirement.getData(
-      ownerList.length + 1,
+      ownerList.length + 1
     );
     await ownableInstance.callSelf(changeRequirementEncodedDataField);
     let newRequired = await ownableInstance.required.call();
@@ -60,7 +60,7 @@ contract('MultiSigOwnable: changeRequirement Unit Test', function(accounts) {
     assert.equal(required.toNumber(), newRequired.toNumber());
 
     changeRequirementEncodedDataField = ownableInstance.contract.changeRequirement.getData(
-      0,
+      0
     );
     await ownableInstance.callSelf(changeRequirementEncodedDataField);
     newRequired = await ownableInstance.required.call();
@@ -70,10 +70,10 @@ contract('MultiSigOwnable: changeRequirement Unit Test', function(accounts) {
 
   it('checks that requirementsChanged event is emitted properly', async function() {
     const changeRequirementEncodedDataField = ownableInstance.contract.changeRequirement.getData(
-      3,
+      3
     );
     const res = await ownableInstance.callSelf(
-      changeRequirementEncodedDataField,
+      changeRequirementEncodedDataField
     );
     const log = res.logs[0];
     assert.equal(log.event, 'RequirementChange');

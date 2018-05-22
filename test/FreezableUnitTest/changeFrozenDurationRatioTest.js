@@ -13,7 +13,7 @@ contract('Freezable: ChangeFrozenDurationRatio Unit Test', function(accounts) {
     const defaultMinTimeFrozen = 8;
     const ratioToSwitch = 14; // some arbitary number to test with
     const changeMinTimeFrozenEncodedData = freezableInstance.contract.changeFrozenDurationRatio.getData(
-      ratioToSwitch,
+      ratioToSwitch
     );
 
     let frozenDurationRatio = await freezableInstance.frozenDurationRatio.call();
@@ -28,19 +28,19 @@ contract('Freezable: ChangeFrozenDurationRatio Unit Test', function(accounts) {
   it('revert if not called from the smart contract Address', async function() {
     const timeToSwitch = 300; // some arbitary number to test with
     const changeMinTimeFrozenEncodedData = freezableInstance.contract.changeMinTimeFrozen.getData(
-      timeToSwitch,
+      timeToSwitch
     );
 
     await utils.assertRevert(
       freezableInstance.sendTransaction({
         from: accounts[0],
-        data: changeMinTimeFrozenEncodedData,
-      }),
+        data: changeMinTimeFrozenEncodedData
+      })
     );
 
     // now check that the proper way to call the function actually works
     const res = await freezableInstance.callSelf(
-      changeMinTimeFrozenEncodedData,
+      changeMinTimeFrozenEncodedData
     );
 
     assert.equal(res.logs.length, 1);
@@ -49,11 +49,11 @@ contract('Freezable: ChangeFrozenDurationRatio Unit Test', function(accounts) {
   it('checks that frozenDurationRatioChanged event is emitted properly', async function() {
     const ratioToSwitch = 12; // some arbitary number to test with
     const changeFrozenDurationRatioEncodedData = freezableInstance.contract.changeFrozenDurationRatio.getData(
-      ratioToSwitch,
+      ratioToSwitch
     );
 
     const res = await freezableInstance.callSelf(
-      changeFrozenDurationRatioEncodedData,
+      changeFrozenDurationRatioEncodedData
     );
     const log = res.logs[0];
 
