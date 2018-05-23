@@ -37,8 +37,7 @@ contract('SideChain: getConfirmationCount Unit Test', function(accounts) {
       { from: accounts[0] }
     );
 
-    let res = 0;
-    res = await sidechainInstance.getConfirmationCount(txHash);
+    let res = await sidechainInstance.getConfirmationCount(txHash);
     assert.equal(res, 1);
 
     await sidechainInstance.submitTransactionSC(
