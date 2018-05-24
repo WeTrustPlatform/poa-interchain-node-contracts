@@ -35,7 +35,7 @@ contract('SideChain: executeTransaction Unit Test', function(accounts) {
   });
 
   it('checks that executeTransaction works as intended if all the condition are valid', async function() {
-    const withdrawAmount = value+1;
+    const withdrawAmount = value + 1;
 
     await sidechainInstance.submitTransactionSC(
       txHash,
@@ -98,7 +98,7 @@ contract('SideChain: executeTransaction Unit Test', function(accounts) {
   });
 
   it('checks that ExecutionFailure event is emitted properly', async function() {
-    const withdrawAmount = value+1;
+    const withdrawAmount = value + 1;
 
     await sidechainInstance.submitTransactionSC(
       txHash,

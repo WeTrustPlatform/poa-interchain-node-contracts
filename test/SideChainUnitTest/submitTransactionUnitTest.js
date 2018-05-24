@@ -33,10 +33,9 @@ contract('SideChain: submitTransactionSC Unit Test', function(accounts) {
   });
 
   it('checks that ETH withdrawal works as intended if all the condition are valid', async function() {
-    const depositAmount = value;
     await sidechainInstance.deposit(accounts[0], {
       from: accounts[0],
-      value: depositAmount
+      value
     });
 
     const user = '0x641cb10d9676e1e2b84d427ea160ce0866c01d20';
@@ -341,13 +340,12 @@ contract('SideChain: submitTransactionSC Unit Test', function(accounts) {
   });
 
   it('checks that ExecutionFailure event is emitted properly', async function() {
-    const depositAmount = 1e7;
     await sidechainInstance.deposit(accounts[0], {
       from: accounts[0],
-      value: depositAmount
+      value
     });
 
-    let withdrawAmount = 1e8;
+    const withdrawAmount = value + 1;
 
     await sidechainInstance.submitTransactionSC(
       txHash,
