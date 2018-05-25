@@ -22,7 +22,7 @@ contract('Freezable: CheckIfFrozen Unit Test', function(accounts) {
     assert.ok(
       now <=
         frozenAt.toNumber() +
-          utils.calculateFrozenDuration(approvalCount, required),
+          utils.calculateFrozenDuration(approvalCount, required)
     );
 
     const res = await freezableInstance.checkIfFrozen.call();
@@ -60,7 +60,7 @@ contract('Freezable: CheckIfFrozen Unit Test', function(accounts) {
     const required = await freezableInstance.required.call();
     let frozenDurationOneApproved = utils.calculateFrozenDuration(
       approvalCount,
-      required,
+      required
     );
     let frozenDuration = frozenDurationOneApproved;
 
@@ -76,7 +76,7 @@ contract('Freezable: CheckIfFrozen Unit Test', function(accounts) {
     approvalCount = await freezableInstance.approvalCount.call();
     let frozenDurationTwoApproved = utils.calculateFrozenDuration(
       approvalCount,
-      required,
+      required
     );
     frozenDuration = frozenDurationTwoApproved - frozenDurationOneApproved;
     res = await freezableInstance.checkIfFrozen.call();
@@ -91,7 +91,7 @@ contract('Freezable: CheckIfFrozen Unit Test', function(accounts) {
     approvalCount = await freezableInstance.approvalCount.call();
     let frozenDurationThreeApproved = utils.calculateFrozenDuration(
       approvalCount,
-      required,
+      required
     );
     frozenDuration = frozenDurationThreeApproved - frozenDurationTwoApproved;
     res = await freezableInstance.checkIfFrozen.call();
@@ -110,7 +110,7 @@ contract('Freezable: CheckIfFrozen Unit Test', function(accounts) {
     const required = await freezableInstance.required.call();
     const frozenDuration = utils.calculateFrozenDuration(
       approvalCount,
-      required,
+      required
     );
 
     let res = await freezableInstance.checkIfFrozen.call();

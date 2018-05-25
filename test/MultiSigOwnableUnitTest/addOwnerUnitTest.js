@@ -16,7 +16,7 @@ contract('MultiSigOwnable: AddOwner Unit Test', function(accounts) {
     assert.notOk(ownersList.includes(newOwner)); // first check that address to be added doesn't exist
 
     const addOwnerEncodedDataField = ownableInstance.contract.addOwner.getData(
-      accounts[5],
+      accounts[5]
     );
     await ownableInstance.callSelf(addOwnerEncodedDataField);
     const newOwnersList = await ownableInstance.getOwners.call();
@@ -29,7 +29,7 @@ contract('MultiSigOwnable: AddOwner Unit Test', function(accounts) {
     const newOwner = accounts[5];
 
     const addOwnerEncodedDataField = ownableInstance.contract.addOwner.getData(
-      newOwner,
+      newOwner
     );
 
     // await utils.assertRevert(ownableInstance.sendTransaction({from: accounts[0], data: addOwnerEncodedDataField}));
@@ -45,7 +45,7 @@ contract('MultiSigOwnable: AddOwner Unit Test', function(accounts) {
     assert.notOk(ownersList.includes(newOwner)); // first check that address to be added doesn't exist
 
     const addOwnerEncodedDataField = ownableInstance.contract.addOwner.getData(
-      ownersList[0],
+      ownersList[0]
     );
     await ownableInstance.callSelf(addOwnerEncodedDataField);
     const newOwnersList = await ownableInstance.getOwners.call();
@@ -58,7 +58,7 @@ contract('MultiSigOwnable: AddOwner Unit Test', function(accounts) {
     const newOwner = accounts[5];
 
     const addOwnerEncodedDataField = ownableInstance.contract.addOwner.getData(
-      newOwner,
+      newOwner
     );
     const res = await ownableInstance.callSelf(addOwnerEncodedDataField);
     const log = res.logs[0];

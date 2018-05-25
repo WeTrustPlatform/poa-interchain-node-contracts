@@ -38,7 +38,7 @@ contract('Freezable: unFreeze Unit Test', function(accounts) {
       assert.equal(frozenAt.toNumber(), 0);
       assert.equal(approvalCount.toNumber(), 0);
       assert.notOk(hasUserApproved);
-    },
+    }
   );
 
   it("checks that unFreeze doesn't unFreeze completely if approvalCount is > 1", async function() {

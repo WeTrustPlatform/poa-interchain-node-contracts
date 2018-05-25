@@ -16,7 +16,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     assert.ok(ownersList.includes(accounts[0])); // first check that address to be added doesn't exist
 
     const removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      accounts[0],
+      accounts[0]
     );
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
     const newOwnersList = await ownableInstance.getOwners.call();
@@ -29,12 +29,12 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     const ownersList = await ownableInstance.getOwners.call();
 
     let removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      ownersList[0],
+      ownersList[0]
     );
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
 
     removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      ownersList[1],
+      ownersList[1]
     );
 
     const res = await ownableInstance.callSelf(removeOwnerEncodedDataField);
@@ -47,13 +47,13 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
 
   it('revert if not called from the smart contract Address', async function() {
     const removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      accounts[5],
+      accounts[5]
     );
     await utils.assertRevert(
       ownableInstance.sendTransaction({
         from: accounts[0],
-        data: removeOwnerEncodedDataField,
-      }),
+        data: removeOwnerEncodedDataField
+      })
     );
     // check that calling the correct doesn't revert
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
@@ -65,7 +65,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     assert.notOk(ownersList.includes(accounts[5])); // first check that address to be added doesn't exist
 
     const removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      ownersList[5],
+      ownersList[5]
     );
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
     const newOwnersList = await ownableInstance.getOwners.call();
@@ -82,7 +82,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
     assert.ok(ownersList.includes(accounts[0]));
 
     let removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      accounts[0],
+      accounts[0]
     );
     // this should fail because required would be > ownerCount if we remove.
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
@@ -92,7 +92,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
 
     assert.ok(ownersList.includes(accounts[0]));
     removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      accounts[0],
+      accounts[0]
     );
     // this should fail because ownerCount would become zero if we remove.
     await ownableInstance.callSelf(removeOwnerEncodedDataField);
@@ -104,7 +104,7 @@ contract('MultiSigOwnable: removeOwner Unit Test', function(accounts) {
 
   it('checks that ownerRemoval event is emitted properly', async function() {
     const removeOwnerEncodedDataField = ownableInstance.contract.removeOwner.getData(
-      accounts[0],
+      accounts[0]
     );
     const res = await ownableInstance.callSelf(removeOwnerEncodedDataField);
     const log = res.logs[0];

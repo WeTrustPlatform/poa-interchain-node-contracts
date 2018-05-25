@@ -28,7 +28,7 @@ module.exports = {
         assert.include(
           e.message,
           'invalid opcode',
-          "contract didn't throw as expected",
+          "contract didn't throw as expected"
         );
       });
   },
@@ -42,7 +42,7 @@ module.exports = {
         assert.include(
           e.message,
           'revert',
-          "contract didn't throw as expected",
+          "contract didn't throw as expected"
         );
       });
   },
@@ -51,7 +51,7 @@ module.exports = {
     approvalCount,
     required,
     minTimeFrozenOpt,
-    ratioOpt,
+    ratioOpt
   ) {
     const minTime = minTimeFrozenOpt || 60 * 60; // one hour by default
     const defaultRatio = ratioOpt || 8;
@@ -78,7 +78,7 @@ module.exports = {
         .then(function(txId) {
           resolve({
             gasUsed: myWeb3.eth.getTransactionReceipt(txId).gasUsed,
-            extraData: extraData,
+            extraData: extraData
           });
         })
         .catch(function(reason) {
@@ -93,7 +93,7 @@ module.exports = {
     toAddress,
     value,
     data,
-    version,
+    version
   ) {
     const hexEncodedData = this.checkAndEncodeHexPrefix(data);
 
@@ -105,7 +105,7 @@ module.exports = {
         { t: 'bytes32', v: txHash },
         { t: 'address', v: toAddress },
         value,
-        { t: 'bytes', v: hexEncodedData },
+        { t: 'bytes', v: hexEncodedData }
       )
       .substring(2);
   },
@@ -124,24 +124,25 @@ module.exports = {
     toAddress,
     value,
     data,
+    version
   ) {
     const privateKey =
       typeof userIndexOrPrivateKey === 'number'
         ? consts.PRIVATE_KEYS[userIndexOrPrivateKey]
         : userIndexOrPrivateKey;
 
-    const msgHash = this.createMsgHash(txHash, toAddress, value, data);
+    const msgHash = this.createMsgHash(txHash, toAddress, value, data, version);
 
     const sig = ethUtils.ecsign(
       Buffer.from(msgHash, 'hex'),
-      Buffer.from(privateKey, 'hex'),
+      Buffer.from(privateKey, 'hex')
     );
 
     return {
       msgHash: '0x' + msgHash,
       v: sig.v,
       r: '0x' + sig.r.toString('hex'),
-      s: '0x' + sig.s.toString('hex'),
+      s: '0x' + sig.s.toString('hex')
     };
   },
 
@@ -152,7 +153,7 @@ module.exports = {
     toAddress,
     value,
     data,
-    version,
+    version
   ) {
     const v = [];
     const r = [];
@@ -164,13 +165,13 @@ module.exports = {
       toAddress,
       value,
       data,
-      version,
+      version
     );
 
     for (let i = 0; i < arryOfUserIndexes.length; i++) {
       const sig = ethUtils.ecsign(
         Buffer.from(msgHash, 'hex'),
-        Buffer.from(consts.PRIVATE_KEYS[arryOfUserIndexes[i]], 'hex'),
+        Buffer.from(consts.PRIVATE_KEYS[arryOfUserIndexes[i]], 'hex')
       );
 
       v.push(sig.v);
@@ -186,7 +187,7 @@ module.exports = {
       jsonrpc: '2.0',
       method: 'evm_increaseTime',
       params: [bySeconds],
-      id: new Date().getTime(),
+      id: new Date().getTime()
     });
   },
 
@@ -194,7 +195,7 @@ module.exports = {
     myWeb3.currentProvider.send({
       jsonrpc: '2.0',
       method: 'evm_mine',
-      id: new Date().getTime(),
+      id: new Date().getTime()
     });
-  },
+  }
 };

@@ -27,7 +27,7 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     destinationMainchainInstance = await mainchain.new(accounts.slice(0, 3), 2);
     await mainchainInstance.deposit(accounts[0], {
       from: accounts[0],
-      value: 1e7,
+      value: 1e7
     });
 
     // freeze mainchainInstance.
@@ -46,25 +46,25 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
 
   it('checks that ETH emergency withdrawal works as intended if all the conditions are valid', async function() {
     const contractBalanceBefore = web3.eth.getBalance(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
     const desContractBalanceBefore = web3.eth.getBalance(toAddress);
 
     // need approvals from 2 owners.
     const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     const res = await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check EmergencyWithdrawal event is fired.
@@ -83,19 +83,19 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
 
     // send 1e7 exampleToken to the mainchainInstance first
     await exampleTokenInstance.transfer(mainchainInstance.address, value, {
-      from: accounts[0],
+      from: accounts[0]
     });
     const tokenBalanceBefore = await exampleTokenInstance.balanceOf.call(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
     const destTokenBalanceBefore = await exampleTokenInstance.balanceOf.call(
-      toAddress,
+      toAddress
     );
 
     // need approvals from 2 owners.
     const transferEncodedData = exampleTokenInstance.contract.transfer.getData(
       toAddress,
-      tokenAmountToSend,
+      tokenAmountToSend
     );
 
     value = 0;
@@ -103,13 +103,13 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
       exampleTokenInstance.address,
       value,
       transferEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     const res = await mainchainInstance.emergencyWithdrawal(
       exampleTokenInstance.address,
       value,
       transferEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check EmergencyWithdrawal event is fired.
@@ -117,16 +117,16 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
 
     // check funds has been moved from mainchainInstance to destinationMainchainInstance.
     const tokenBalanceAfter = await exampleTokenInstance.balanceOf.call(
-      mainchainInstance.address,
+      mainchainInstance.address
     );
     const destTokenBalanceAfter = await exampleTokenInstance.balanceOf.call(
-      toAddress,
+      toAddress
     );
 
     assert.equal(tokenBalanceBefore - tokenBalanceAfter, tokenAmountToSend);
     assert.equal(
       destTokenBalanceAfter - destTokenBalanceBefore,
-      tokenAmountToSend,
+      tokenAmountToSend
     );
   });
 
@@ -139,15 +139,15 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     assert.notOk(isFrozen);
 
     const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await utils.assertRevert(
       mainchainInstance.emergencyWithdrawal(
         toAddress,
         value,
         depositEncodedData,
-        { from: accounts[0] },
-      ),
+        { from: accounts[0] }
+      )
     );
 
     // check when mainchainInstance is frozen, emergencyWithdrawal works as intended.
@@ -159,13 +159,13 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     const res = await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check EmergencyWithdrawal event is fired.
@@ -175,15 +175,15 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
   it('revert if msg.sender is not owner', async function() {
     // one less signature than required
     const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await utils.assertRevert(
       mainchainInstance.emergencyWithdrawal(
         toAddress,
         value,
         depositEncodedData,
-        { from: accounts[5] },
-      ),
+        { from: accounts[5] }
+      )
     );
 
     // check when msg.sender is owner, emergencyWithdrawal works as intended.
@@ -191,13 +191,13 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     const res = await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check EmergencyWithdrawal event is fired.
@@ -207,21 +207,21 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
   it("revert if there aren't enough valid signatures", async function() {
     // two of the same signature
     const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     await utils.assertRevert(
       mainchainInstance.emergencyWithdrawal(
         toAddress,
         value,
         depositEncodedData,
-        { from: accounts[0] },
-      ),
+        { from: accounts[0] }
+      )
     );
 
     // check when there are enough valid signatures, emergencyWithdrawal works as intended.
@@ -229,7 +229,7 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check EmergencyWithdrawal event is fired.
@@ -241,19 +241,19 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     const contractBalance = web3.eth.getBalance(mainchainInstance.address);
     value = contractBalance + 1;
     let depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     let res = await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check EmergencyFailure is emitted.
@@ -262,38 +262,38 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
     // check when external_call successes, EmergencyWithdrawal is emitted.
     value = contractBalance - 1;
     depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     res = await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
     assert.equal(res.logs[1].event, 'EmergencyWithdrawal');
   });
 
   it('Revert when transaction has already been executed.', async function() {
     const depositEncodedData = destinationMainchainInstance.contract.deposit.getData(
-      toAddress,
+      toAddress
     );
     await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[0] },
+      { from: accounts[0] }
     );
     let res = await mainchainInstance.emergencyWithdrawal(
       toAddress,
       value,
       depositEncodedData,
-      { from: accounts[1] },
+      { from: accounts[1] }
     );
 
     // check transaction is executed successfully.
@@ -305,8 +305,8 @@ contract('MainChain: emergencyWithdrawal Unit Test', function(accounts) {
         toAddress,
         value,
         depositEncodedData,
-        { from: accounts[0] },
-      ),
+        { from: accounts[0] }
+      )
     );
   });
 });

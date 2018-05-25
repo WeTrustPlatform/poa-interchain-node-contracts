@@ -10,7 +10,7 @@ let toAddress;
 contract('SideChain: Deposit Unit Test', function(accounts) {
   beforeEach(async function() {
     sidechainInstance = await sidechain.new(accounts.slice(0, 3), 2, {
-      from: accounts[0],
+      from: accounts[0]
     });
     depositAmount = 1e8;
     toAddress = accounts[0];
@@ -22,7 +22,7 @@ contract('SideChain: Deposit Unit Test', function(accounts) {
     assert.equal(contractBalance.toNumber(), 0);
     await sidechainInstance.deposit(toAddress, {
       from: accounts[0],
-      value: depositAmount,
+      value: depositAmount
     });
 
     const newContractBalance = web3.eth.getBalance(sidechainInstance.address);
@@ -34,14 +34,14 @@ contract('SideChain: Deposit Unit Test', function(accounts) {
     utils.assertRevert(
       sidechainInstance.deposit(toAddress, {
         from: accounts[0],
-        value: depositAmount,
-      }),
+        value: depositAmount
+      })
     );
 
     toAddress = accounts[0];
     const res = await sidechainInstance.deposit(toAddress, {
       from: accounts[0],
-      value: depositAmount,
+      value: depositAmount
     });
 
     assert.equal(res.logs.length, 1);
@@ -52,14 +52,14 @@ contract('SideChain: Deposit Unit Test', function(accounts) {
     utils.assertRevert(
       sidechainInstance.deposit(toAddress, {
         from: accounts[0],
-        value: depositAmount,
-      }),
+        value: depositAmount
+      })
     );
 
     depositAmount = 1e8;
     const res = await sidechainInstance.deposit(toAddress, {
       from: accounts[0],
-      value: depositAmount,
+      value: depositAmount
     });
 
     assert.equal(res.logs.length, 1);
@@ -68,7 +68,7 @@ contract('SideChain: Deposit Unit Test', function(accounts) {
   it('checks that deposited event is emitted properly', async function() {
     const res = await sidechainInstance.deposit(toAddress, {
       from: accounts[0],
-      value: depositAmount,
+      value: depositAmount
     });
     const log = res.logs[0];
     assert.equal(log.event, 'Deposit');
