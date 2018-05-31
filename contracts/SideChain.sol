@@ -200,7 +200,7 @@ contract SideChain is Freezable {
       onlyNotExecuted(txHash)
       public {
         delete(sideChainTx[txHash]);
-        sideChainTxCount -= 1;
+        sideChainTxCount = SafeMath.sub(sideChainTxCount, 1);
         emit TransactionRemoved(txHash);
     }
 
