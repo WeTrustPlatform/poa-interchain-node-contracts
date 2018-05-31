@@ -2,6 +2,7 @@ pragma solidity ^0.4.21;
 
 import "./libs/MultiSigOwnable.sol";
 import "./libs/Freezable.sol";
+import "./libs/SafeMath.sol";
 
 contract MainChain is Freezable {
     //////////////////////
@@ -260,6 +261,6 @@ contract MainChain is Freezable {
             value: value,
             data: data
             });
-        transactionCount += 1;
+        transactionCount = SafeMath.add(transactionCount, 1);
     }
 }
