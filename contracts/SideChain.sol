@@ -191,7 +191,8 @@ contract SideChain is Freezable {
             _isSignedSC[i] = isSignedSCTemp[i];
     }
 
-    /// @dev Allow to remove a txHash from sideChainTx which will prevent a DOS attack.
+    /// @dev Allow to remove a txHash from sideChainTx,
+    //  @dev which deal with DOS attacks in case attackers flood the transactions with correct txHash.
     /// @param txHash transaction hash to be removed
     function removeTransactionSC(bytes32 txHash)
       onlyByWallet

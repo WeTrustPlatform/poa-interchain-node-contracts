@@ -119,7 +119,7 @@ contract('SideChain: removeTransactionSC Unit Test', function(accounts) {
     // check transaction has executed.
     let sideChainTx = sidechainInstance.contract.sideChainTx.call(txHash);
 
-    assert.equal(sideChainTx[4], true); // sideChainTx[1] is the transaction target address.
+    assert.equal(sideChainTx[4], true); // sideChainTx[4] is sideChainTx[txHash].excuted.
 
     const removeTranscationSCData = sidechainInstance.contract.removeTransactionSC.getData(
       txHash
