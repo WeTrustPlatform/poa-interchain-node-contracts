@@ -57,7 +57,7 @@ contract('SideChain: removeTransactionSC Unit Test', function(accounts) {
       { from: accounts[0] }
     );
 
-    await sidechainInstance.submitTransactionSC(
+    const res = await sidechainInstance.submitTransactionSC(
       txHash,
       toAddress,
       value,
@@ -70,6 +70,9 @@ contract('SideChain: removeTransactionSC Unit Test', function(accounts) {
       txHashes[0]
     );
     assert.equal(sideChainTx[1], consts.ZERO_ADDRESS); // sideChainTx[1] is the transaction target address.
+
+    // check TransactionRemoved event is emitted.
+    assert.equal(res.logs[1].event, 'TransactionRemoved');
   });
 
   it('revert if not onlyByWallet', async function() {
