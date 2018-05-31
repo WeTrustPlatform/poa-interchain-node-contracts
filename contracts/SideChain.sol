@@ -19,12 +19,18 @@ contract SideChain is Freezable {
     event ExecutionFailure(bytes32 indexed txHash);
     event Deposit(address indexed sender, address indexed to, uint value);
     event SignatureAdded(bytes32 txHash, uint8 v, bytes32 r, bytes32 s);
+    event TransactionRemoved(bytes32 indexed txHash);
 
     //////////////////////
     //	 Modifiers
     /////////////////////
     modifier notNull(address _address) {
         require(_address != 0);
+        _;
+    }
+
+    modifier onlyNotExecuted(bytes32 txHash) {
+        require(!sideChainTx[txHash].executed);
         _;
     }
 
@@ -113,8 +119,8 @@ contract SideChain is Freezable {
     /// @param txHash to revoke confirmation
     function revokeConfirmation(bytes32 txHash)
       ownerExists(msg.sender)
+      onlyNotExecuted(txHash)
       public {
-        require(!sideChainTx[txHash].executed);
         require(isSignedSC[txHash][msg.sender]);
 
         isSignedSC[txHash][msg.sender] = false;
@@ -124,8 +130,8 @@ contract SideChain is Freezable {
     /// @dev Allows anyone to execute a confirmed transaction.
     /// @param txHash to be executed
     function executeTransaction(bytes32 txHash)
+      onlyNotExecuted(txHash)
       public {
-        require(!sideChainTx[txHash].executed);
         if (isConfirmed(txHash)) {
             SideChainTransaction storage txn = sideChainTx[txHash];
             txn.executed = true;
@@ -183,6 +189,17 @@ contract SideChain is Freezable {
         _isSignedSC = new address[](count);
         for (i = 0; i<count; i++)
             _isSignedSC[i] = isSignedSCTemp[i];
+    }
+
+    /// @dev Allow to remove a txHash from sideChainTx which will prevent a DOS attack.
+    /// @param txHash transaction hash to be removed
+    function removeTransactionSC(bytes32 txHash)
+      onlyByWallet
+      onlyNotExecuted(txHash)
+      public {
+        delete(sideChainTx[txHash]);
+        sideChainTxCount -= 1;
+        emit TransactionRemoved(txHash);
     }
 
     /////////////////////////
