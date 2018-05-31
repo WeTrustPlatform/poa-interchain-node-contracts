@@ -2,6 +2,7 @@ pragma solidity ^0.4.21;
 
 import "./libs/MultiSigOwnable.sol";
 import "./libs/Freezable.sol";
+import "./libs/SafeMath.sol";
 
 contract SideChain is Freezable {
     //////////////////////
@@ -199,7 +200,7 @@ contract SideChain is Freezable {
       onlyNotExecuted(txHash)
       public {
         delete(sideChainTx[txHash]);
-        sideChainTxCount -= 1;
+        sideChainTxCount = SafeMath.sub(sideChainTxCount, 1);
         emit TransactionRemoved(txHash);
     }
 
@@ -224,7 +225,7 @@ contract SideChain is Freezable {
             executed: false,
             data: data
             });
-        sideChainTxCount += 1;
+        sideChainTxCount = SafeMath.add(sideChainTxCount, 1);
     }
 
     // call has been separated into its own function in order to take advantage
@@ -302,7 +303,7 @@ contract SideChain is Freezable {
             value: value,
             data: data
             });
-        mainChainTxCount += 1;
+        mainChainTxCount = SafeMath.add(mainChainTxCount, 1);
     }
 
     /// @dev retrieve the value and signatures of a txHash
