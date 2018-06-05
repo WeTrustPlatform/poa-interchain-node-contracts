@@ -66,7 +66,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Acknowledgments
-The Proposed version of Multi Signature Smart Contract is based on [Gnosis MultiSig Wallet](https://github.com/gnosis/MultiSigWallet) and inspired by bitcoin's P2SH protocol which is primarily used for creation of multi signature wallets, see [here](https://www.soroushjp.com/2014/12/20/bitcoin-multisig-the-hard-way-understanding-raw-multisignature-bitcoin-transactions/) for more Info.
+This version of Multi Signature Smart Contract is inspired by [Gnosis MultiSig Wallet](https://github.com/gnosis/MultiSigWallet) and inspired by bitcoin's P2SH protocol which is primarily used for creation of multi signature wallets, see [here](https://www.soroushjp.com/2014/12/20/bitcoin-multisig-the-hard-way-understanding-raw-multisignature-bitcoin-transactions/) for more Info.
 
 ## License
 [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) &copy; WeTrustPlatform
