@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/WeTrustPlatform/interchain-node-contracts.svg?token=52dbeJVrfqXvGhWfS1U6&branch=develop)](https://travis-ci.com/WeTrustPlatform/interchain-node-contracts)
 
-# Interchain-node-contracts
+# poa-interchain-node-contracts
 
 These smart contracts are designed with intention to be used as part of the interchain nodes where money is transferred between two different blockchains (Main Chain and Side Chain).
 
