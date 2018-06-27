@@ -34,8 +34,8 @@ The flow to upgrade would be as follow:
 ### Install
 
 ```
-git clone git@github.com:WeTrustPlatform/interchain-node-contracts.git
-cd interchain-node-contracts
+git clone git@github.com:WeTrustPlatform/poa-interchain-node-contracts.git
+cd poa-interchain-node-contracts
 npm install
 ```
 
@@ -60,7 +60,7 @@ npm run lint
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags](https://github.com/WeTrustPlatform/interchain-node-contracts/tags) on this repository.
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags](https://github.com/WeTrustPlatform/poa-interchain-node-contracts/tags) on this repository.
 
 ## Security
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
